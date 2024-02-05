@@ -1,15 +1,14 @@
 {
   "name": "bachelor-project",
   "version": "1.0.0",
-  "description": "",
+  "description": "This is the bachelor project for Tobias Vittrup Bak, Kevin Mike Torp & Thor Malmby Jørgin",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "webpack serve --open",
     "build": "webpack --config webpack.config.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "Tobias Vittrup Bak, Kevin Mike Torp & Thor Malmby Jørgin",
+  "license": "GNU General Public License",
   "devDependencies": {
     "css-loader": "^6.10.0",
     "html-loader": "^5.0.0",
