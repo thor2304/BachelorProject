@@ -4,7 +4,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 module.exports = {
     mode: 'development', // For production, use 'production' (is set to development for dev server to work properly)
     entry: {
-        input: './src/input.js',
+        input: './src/input.ts',
         robot_socket: './src/robot_socket.js',
     },
     devtool: 'inline-source-map',
