@@ -39,8 +39,6 @@ module.exports = {
     plugins: [
         new HtmlWebpackPlugin({ // Generate index.html based on src/index.html
             hash: true,
-            title: 'My Awesome application',
-            myPageHeader: 'Hello World',
             template: './src/index.html',
             filename: './index.html' //relative to root of the application
         })
