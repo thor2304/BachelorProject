@@ -14,9 +14,10 @@ def get_handler(socket: Socket) -> callable:
 
 
 async def main():
-    interpreter_socket: Socket = get_interpreter_socket("localhost")
+    print("Connecting to interpreter")
+    interpreter_socket: Socket = get_interpreter_socket("polyscope")
     print("Starting websocket server")
-    async with serve(get_handler(interpreter_socket), "localhost", 8765):
+    async with serve(get_handler(interpreter_socket), "0.0.0.0", 8767):
         await asyncio.Future()  # run forever
 
 

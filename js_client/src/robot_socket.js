@@ -58,7 +58,7 @@ async function testCommands() {
         "popup(\"post\",\"post\")"
     ]
 
-    const proxyServer = get_socket("localhost", 8765);
+    const proxyServer = get_socket("localhost", 8767);
     proxyServer.onopen = () => {
         console.log('proxy server opened');
         for (const command of commands) {

@@ -1,7 +1,7 @@
-import asyncio
 import socket  # for socket
 from socket import socket as Socket
 from time import sleep
+
 
 def get_socket(ip, port):
     try:
@@ -11,18 +11,33 @@ def get_socket(ip, port):
         print(f"socket creation failed with error {err}")
         return
 
-    my_socket.connect((ip, port))
+    try:
+        my_socket.connect((ip, port))
+        print(f"Socket connected to {ip}:{port}")
+    except ConnectionRefusedError:
+        print(f"Connection to {ip}:{port} refused - retrying in 1 second")
+        sleep(1)
+        return get_socket(ip, port)
+
     return my_socket
 
 
 def main():
-    host_ip: str = "localhost"
+    print("Starting")
+    host_ip: str = "polyscope"
     interpreter_socket: Socket = get_interpreter_socket(host_ip)
 
     interpreter_socket.close()
 
 
 def get_interpreter_socket(host_ip: str):
+    dashboard_socket = get_socket(host_ip, 29999)
+    sleep(5)
+    send_command("power on", dashboard_socket)
+    sleep(1)
+    send_command("brake release", dashboard_socket)
+    sleep(1)
+
     secondary_socket = get_socket(host_ip, 30002)
     send_command("interpreter_mode()", secondary_socket)
     sleep(2)
