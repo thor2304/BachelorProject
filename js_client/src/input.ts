@@ -1,5 +1,5 @@
 const inputField: HTMLInputElement = <HTMLInputElement> document.getElementById("inputField")
-const commandArea: HTMLElement = document.getElementById("commandArea");
+const commandList: HTMLElement = document.getElementById("commandList");
 
 function getTextFromInput2(): string {
     const text: string = inputField.value;
@@ -8,9 +8,9 @@ function getTextFromInput2(): string {
 }
 
 function createPTagWithText2(text: string): void{
-    const pTag: HTMLParagraphElement = document.createElement('p');
-    pTag.textContent = text;
-    commandArea.appendChild(pTag)
+    const liElement: HTMLLIElement = document.createElement('li');
+    liElement.textContent = text;
+    commandList.appendChild(liElement).scrollIntoView({behavior: "smooth"})
 }
 
 inputField.addEventListener('keypress', function (e: KeyboardEvent): void {

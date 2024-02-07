@@ -1,0 +1,69 @@
+html, body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f4;
+  margin: 0;
+  padding: 10px;
+}
+
+.flex {
+  display: flex;
+}
+.column {
+  flex-direction: column;
+}
+.row {
+  flex-direction: row;
+}
+.sb{
+  justify-content: space-between;
+}
+
+.commandArea {
+  width: 40%;
+  height: 95vh;
+}
+
+.commandHistory {
+  width: 100%;
+  height: 80vh;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  box-sizing: border-box;
+  overflow: auto;
+}
+
+#inputField {
+  width: 100%;
+  height: 15vh;
+  padding: 12px 20px;
+  margin: 8px 0;
+  display: block;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  box-sizing: border-box;
+  resize: none;
+}
+
+.visualizationArea {
+  width: 55%;
+}
+
+.robotVisualization {
+  height: 45vh;
+  width: 100%;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(255, 0, 0, 0.3);
+  box-sizing: border-box;
+  background: hsl(208, 21%, 12%);
+}
+
+.variableVisualization {
+  height: 45vh;
+  width: 100%;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 255, 0.3);
+  box-sizing: border-box;
+}
