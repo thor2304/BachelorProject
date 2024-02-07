@@ -7,6 +7,7 @@ module.exports = {
         input: './src/input.ts',
         robot_socket: './src/robot_socket.js',
         style: './src/style.css',
+        robot_3d_plot: './src/robot3dplot.png',
     },
     devtool: 'inline-source-map',
     devServer: {
