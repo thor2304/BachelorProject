@@ -5,12 +5,25 @@
     <title>REPL</title>
 </head>
 <body>
-    <div id="commandArea">
-
+    <div class="flex row sb">
+        <div class="flex column commandArea sb">
+            <div class="commandHistory">
+                <ol type="1" id="commandList">
+                </ol>
+            </div>
+            <div>
+                <label for="inputField"></label>
+                <textarea name="inputField" id="inputField" placeholder="Type a command!"></textarea>
+            </div>
+        </div>
+        <div class="flex column visualizationArea sb">
+            <div class="robotVisualization">
+                <p>Here there will be a robot visualization</p>
+            </div>
+            <div class="variableVisualization">
+                <p>Here there will be a variable visualization</p>
+            </div>
+        </div>
     </div>
-
-    <label for="inputField">Input:</label>
-    <input type="text" id="inputField" placeholder="Type a command!">
-
 </body>
 </html>
