@@ -86,6 +86,13 @@ def send_test_commands(interpreter_socket):
     )
     send_command(function_def_no_new_line, interpreter_socket)
 
+    function_connect_to_socket = (
+        'socket_open("proxy","8000")\n'
+        'socket_send_string("Hello from UR")\n'
+    )
+
+
+
     send_command("test()\n", interpreter_socket)
 
     send_command('popup("post","post")', interpreter_socket)
