@@ -26,4 +26,6 @@ services:
       - type: bind
         source: ./python
         target: /app
+    tty: true
+    stdin_open: true
 #https://github.com/urrsk/ursim_docker/blob/main/ursim/e-series/Dockerfile
