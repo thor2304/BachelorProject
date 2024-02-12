@@ -94,7 +94,7 @@ def send_test_commands(interpreter_socket):
 def send_command(command: str, on_socket: Socket):
     command = command + '\n' if not command.endswith('\n') else command
     on_socket.send(command.encode())
-    # print(socket.recv(2048))
+    print(f"Recieved: {on_socket.recv(2048)}")
 
 
 if __name__ == '__main__':
