@@ -14,6 +14,20 @@ def get_handler(socket: Socket) -> callable:
 
 
 async def main():
+    task1 = asyncio.create_task(start_webserver())
+    task2 = asyncio.create_task(hello())
+
+    await task1
+    await task2
+
+
+async def hello():
+    while True:
+        await asyncio.sleep(2)
+        print("Hello")
+
+
+async def start_webserver():
     print("Connecting to interpreter")
     interpreter_socket: Socket = get_interpreter_socket("polyscope")
     print("Starting websocket server")
