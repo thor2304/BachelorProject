@@ -6,50 +6,39 @@ from socket import socket as Socket
 from socket import gethostbyname, gethostname, AF_INET, SOCK_STREAM, error
 from RobotControl import send_command, get_interpreter_socket
 
-interpreter_socket = get_interpreter_socket("polyscope")
-
 clients = dict()
 
 
 def get_handler(socket: Socket) -> callable:
     async def echo(websocket):
         async for message in websocket:
-            print(message)
             send_command(message, socket)
 
     return echo
 
 
 async def main():
-    host = 'localhost'
-    port = 8000
-    loop = asyncio.get_event_loop()
-    
-    server_coro = asyncio.start_server(client_connected_cb,
-                                       host=host,
-                                       port=port,
-                                       loop=loop)
-    print("Starting server")
-    server = loop.run_until_complete(server_coro)
-    print("Server started")
-    print('Starting proxy...')
-    loop.run_until_complete(start_webserver())
-    print('Proxy started')
+    async with asyncio.TaskGroup() as tg:
+        t1 = tg.create_task(open_robot_server())
+        t2 = tg.create_task(start_webserver())
+    pass
 
-    try:
-        print('Serving on {}:{}'.format(host, port))
-        loop.run_forever()
-    except KeyboardInterrupt as e:
-        print('Keyboard interrupted. Exit.')
-    # Close the server
-    server.close()
-    print('Server closed')
-    loop.run_until_complete(server.wait_closed())
-    loop.close()
+
+async def open_robot_server():
+    print("#### robot server")
+    host = '0.0.0.0'
+    port = 8000
+    # loop = asyncio.get_event_loop()
+    srv = await asyncio.start_server(client_connected_cb, host=host, port=port)
+    print("##### robot server started")
+    async with srv:
+        print('#### we in here Server started')
+        await srv.serve_forever()
 
 
 def client_connected_cb(client_reader, client_writer):
     # Use peername as client ID
+    print("########### We got a customer<<<<<<<<<<<<<")
     client_id = client_writer.get_extra_info('peername')
 
     print('Client connected: {}'.format(client_id))
@@ -122,9 +111,11 @@ async def client_task(reader, writer):
 #         print(data)
 
 
+
+
 async def start_webserver():
     print("Connecting to interpreter")
-    # interpreter_socket: Socket = get_interpreter_socket("polyscope")
+    interpreter_socket: Socket = get_interpreter_socket("polyscope")
     print("Starting websocket server")
     async with serve(get_handler(interpreter_socket), "0.0.0.0", 8767):
         await asyncio.Future()  # run forever
