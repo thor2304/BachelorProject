@@ -31,6 +31,7 @@ async def open_robot_server():
     # loop = asyncio.get_event_loop()
     srv = await asyncio.start_server(client_connected_cb, host=host, port=port)
     print("##### robot server started")
+    print(f"ip_address: {gethostbyname(gethostname())}")
     async with srv:
         print('#### we in here Server started')
         await srv.serve_forever()
@@ -69,48 +70,7 @@ async def client_task(reader, writer):
             print('Received EOF. Client disconnected.')
             return
         else:
-            print('Received: {}'.format(data.decode()))
-
-
-# async def open_and_listen_on_socket():
-#     print(f"Starting  ###########################")
-#     HOST_IP_ADDRESS = gethostbyname(gethostname())
-#     PORT = 8000
-#
-#     # create a TCP/IP socket
-#     server_socket = Socket(AF_INET, SOCK_STREAM)
-#
-#     try:
-#         server_socket.bind((HOST_IP_ADDRESS, PORT))
-#     except error as e:
-#         print("Error binding the socket: {}".format(e))
-#         sys.exit(1)
-#
-#     try:
-#         server_socket.listen()
-#     except error as e:
-#         print("Error listening on the socket: {}".format(e))
-#         sys.exit(1)
-#
-#     print("Waiting for a connection...")
-#     try:
-#         conn, addr = server_socket.accept()
-#     except error as e:
-#         print("Error accepting a connection: {}".format(e))
-#         sys.exit(1)
-#
-#     print("Connected to {}".format(addr))
-#     print_data(conn)
-
-
-# def print_data(socket):
-#     while True:
-#         data = socket.recv(1024)
-#         if not data:
-#             break
-#         print(data)
-
-
+            print('Backend Received: {}'.format(data.decode()))
 
 
 async def start_webserver():

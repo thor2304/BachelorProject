@@ -106,12 +106,17 @@ def send_command(command: str, on_socket: Socket):
     command = command + '\n' if not command.endswith('\n') else command
     print(f"Sending the following command: '{command.encode('unicode_escape').decode('utf-8')}'")
     on_socket.send(command.encode())
-    print(f"Recieved 1st: {read_from_socket(on_socket)}")
-    print(f"Recieved 2nd: {read_from_socket(on_socket)}")
+    result = read_from_socket(on_socket)
+    count = 1
+    while result != "nothing":
+        print(f"Recieved {count}: {result}")
+        result = read_from_socket(on_socket)
+        count += 1
+
 
 
 def read_from_socket(socket: Socket):
-    ready_to_read, ready_to_write, in_error = select.select([socket], [], [], 1)
+    ready_to_read, ready_to_write, in_error = select.select([socket], [], [], 0.1)
     if ready_to_read:
         return socket.recv(2048)
     return "nothing"
