@@ -108,7 +108,7 @@ def send_command(command: str, on_socket: Socket):
     on_socket.send(command.encode())
     result = read_from_socket(on_socket)
     count = 1
-    while result != "nothing":
+    while result != "nothing" and count < 2:
         print(f"Recieved {count}: {result}")
         result = read_from_socket(on_socket)
         count += 1
