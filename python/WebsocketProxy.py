@@ -28,7 +28,7 @@ async def main():
 async def open_robot_server():
     host = '0.0.0.0'
     port = 8000
-    srv = await asyncio.start_server(client_connected_callback, host=host, port=port)
+    srv = await asyncio.start_server(client_connected_cb, host=host, port=port)
     print(f"ip_address of this container: {gethostbyname(gethostname())}")
     async with srv:
         print('server listening for robot connections')
