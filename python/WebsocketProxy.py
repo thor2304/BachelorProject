@@ -34,7 +34,12 @@ async def open_robot_server():
     print(f"ip_address: {gethostbyname(gethostname())}")
     async with srv:
         print('#### we in here Server started')
+        connect_to_robot_server(gethostbyname(gethostname()), port)
         await srv.serve_forever()
+
+
+def connect_to_robot_server(host: str, port: int):
+    send_command(f"socket_open(\"{host}\", {port})\n", get_interpreter_socket())
 
 
 def client_connected_cb(client_reader, client_writer):
@@ -75,7 +80,7 @@ async def client_task(reader, writer):
 
 async def start_webserver():
     print("Connecting to interpreter")
-    interpreter_socket: Socket = get_interpreter_socket("polyscope")
+    interpreter_socket: Socket = get_interpreter_socket()
     print("Starting websocket server")
     async with serve(get_handler(interpreter_socket), "0.0.0.0", 8767):
         await asyncio.Future()  # run forever
