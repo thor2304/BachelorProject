@@ -3,7 +3,7 @@ import asyncio
 from websockets.server import serve
 from socket import socket as Socket
 from socket import gethostbyname, gethostname, AF_INET, SOCK_STREAM, error
-from RobotControl import send_command, get_interpreter_socket
+from RobotControl import send_command, get_interpreter_socket, send_wrapped_command
 
 clients = dict()
 
@@ -11,7 +11,7 @@ clients = dict()
 def get_handler(socket: Socket) -> callable:
     async def echo(websocket):
         async for message in websocket:
-            result = send_command(message, socket)
+            result = send_wrapped_command(message, socket)
             await websocket.send(result)
 
     return echo

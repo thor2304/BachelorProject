@@ -83,7 +83,7 @@ def receive_input_commands(interpreter_socket: Socket):
 
 
 def send_test_commands(interpreter_socket: Socket):
-    send_command("set_digital_out(0, False)\n", interpreter_socket)
+    send_wrapped_command("set_digital_out(0, False)\n", interpreter_socket)
 
     send_command("set_digital_out(1, False)\n", interpreter_socket)
     send_command("set_digital_out(2, False)\n", interpreter_socket)
@@ -141,10 +141,24 @@ def send_command(command: str, on_socket: Socket) -> str:
     return escape_string(out)
 
 
+def send_wrapped_command(command: str, on_socket: Socket) -> str:
+    send_command(f"socket_send_string(\"Starting command\")", on_socket)
+    send_command(command, on_socket)
+    return send_command(f"socket_send_string(\"Finished command\")", on_socket)
+
+
 def read_from_socket(socket: Socket) -> str:
     ready_to_read, ready_to_write, in_error = select.select([socket], [], [], 0.1)
     if ready_to_read:
-        return socket.recv(2048).decode()
+        message = socket.recv(2048)
+
+        try:
+            return message.decode()
+        except UnicodeDecodeError as e:
+            # Intentionally not returning anything.
+            # Returning nothing if a decode error occurs.
+            print(f"Error decoding message: {e}")
+
     return "nothing"
 
 
