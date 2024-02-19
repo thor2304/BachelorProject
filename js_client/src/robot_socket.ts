@@ -1,4 +1,4 @@
-function get_socket(ip, port) {
+function get_socket(ip: string, port: number) {
     return new WebSocket(
         `ws://${ip}:${port}`
     );
@@ -9,7 +9,7 @@ function get_socket(ip, port) {
  * @param socket {WebSocket}
  * @param data {string}
  */
-function send(socket, data) {
+function send(socket: WebSocket, data: any) {
     if (socket.readyState === WebSocket.CLOSED) {
         console.log('socket closed');
         return;
@@ -23,10 +23,10 @@ function send(socket, data) {
     socket.send(data);
 }
 
-async function getInterpreterSocket(ip) {
+async function getInterpreterSocket(ip: string) {
     const secondarySocket = get_socket(ip, 30002);
 
-    const out = new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
         secondarySocket.onopen = () => {
             console.log('secondary socket opened');
             send(secondarySocket, 'interpreter_mode()');
@@ -36,9 +36,7 @@ async function getInterpreterSocket(ip) {
         secondarySocket.onerror = (event) => {
             reject(event);
         }
-    });
-
-    return out
+    })
 }
 
 async function testCommands() {
@@ -64,7 +62,7 @@ async function testCommands() {
         for (const command of commands) {
             send(proxyServer, command);
         }
-        document.addEventListener('commandEntered', function (e) {
+        document.addEventListener('commandEntered', function (e: CustomEvent) {
             send(proxyServer, e.detail.text)
         })
     };

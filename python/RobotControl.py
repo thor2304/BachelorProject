@@ -1,33 +1,46 @@
 import socket  # for socket
 from socket import socket as Socket
 from time import sleep
+from typing import Callable
 
 import select
 
+from ToolBox import escape_string
 
-def get_socket(ip, port):
-    print("hello there")
-    try:
-        my_socket: Socket = Socket(socket.AF_INET, socket.SOCK_STREAM)
-        print(f"Socket successfully created for {ip}:{port}")
-    except socket.error as err:
-        print(f"socket creation failed with error {err}")
-        return
 
-    try:
-        my_socket.connect((ip, port))
-        print(f"Socket connected to {ip}:{port}")
-    except ConnectionRefusedError:
-        print(f"Connection to {ip}:{port} refused - retrying in 1 second")
-        sleep(1)
-        return get_socket(ip, port)
+def create_get_socket_function() -> Callable[[str, int], Socket]:
+    inner_socket_bank: dict[tuple[str, int], Socket] = dict()
 
-    my_socket.setblocking(False)
-    return my_socket
+    def inner_get_socket(ip: str, port: int) -> Socket | None:
+        if (ip, port) in inner_socket_bank:
+            return inner_socket_bank[(ip, port)]
+        try:
+            my_socket: Socket = Socket(socket.AF_INET, socket.SOCK_STREAM)
+            print(f"Socket successfully created for {ip}:{port}")
+        except socket.error as err:
+            print(f"socket creation failed with error {err}")
+            return
+
+        try:
+            my_socket.connect((ip, port))
+            print(f"Socket connected to {ip}:{port}")
+        except ConnectionRefusedError:
+            print(f"Connection to {ip}:{port} refused - retrying in 1 second")
+            sleep(1)
+            return get_socket(ip, port)
+
+        my_socket.setblocking(False)
+        inner_socket_bank[(ip, port)] = my_socket
+        return my_socket
+
+    return inner_get_socket
+
+
+get_socket = create_get_socket_function()
 
 
 def main():
-    print("Starting")
+    print("Starting RobotControl.py")
     host_ip: str = "polyscope"
     interpreter_socket: Socket = get_interpreter_socket(host_ip)
 
@@ -46,20 +59,20 @@ def get_interpreter_socket(host_ip: str):
     send_command("interpreter_mode()", secondary_socket)
     sleep(2)
 
-    # default port for socket
+    # default port for interpreter socket
     port: int = 30020
 
     return get_socket(host_ip, port)
 
 
-def receive_input_commands(interpreter_socket):
+def receive_input_commands(interpreter_socket: Socket):
     for i in range(30):
         # print(my_socket.recv(2048))
         action = input('Action?\n')
         send_command(action, interpreter_socket)
 
 
-def send_test_commands(interpreter_socket):
+def send_test_commands(interpreter_socket: Socket):
     send_command("set_digital_out(0, False)\n", interpreter_socket)
 
     send_command("set_digital_out(1, False)\n", interpreter_socket)
@@ -100,25 +113,28 @@ def send_test_commands(interpreter_socket):
     send_command('popup("post","post")', interpreter_socket)
 
 
-def send_command(command: str, on_socket: Socket):
+def send_command(command: str, on_socket: Socket) -> str:
     if command.startswith("\n"):
         command = command[1:]
     command = command + '\n' if not command.endswith('\n') else command
-    print(f"Sending the following command: '{command.encode('unicode_escape').decode('utf-8')}'")
+    print(f"Sending the following command: '{escape_string(command)}'")
     on_socket.send(command.encode())
     result = read_from_socket(on_socket)
+    out = result
     count = 1
     while result != "nothing" and count < 2:
-        print(f"Recieved {count}: {result}")
+        print(f"Recieved {count}: {escape_string(result)}")
         result = read_from_socket(on_socket)
         count += 1
+        out += result
+
+    return escape_string(out)
 
 
-
-def read_from_socket(socket: Socket):
+def read_from_socket(socket: Socket) -> str:
     ready_to_read, ready_to_write, in_error = select.select([socket], [], [], 0.1)
     if ready_to_read:
-        return socket.recv(2048)
+        return socket.recv(2048).decode()
     return "nothing"
 
 

@@ -1,5 +1,4 @@
 import asyncio
-import sys
 
 from websockets.server import serve
 from socket import socket as Socket
@@ -12,12 +11,14 @@ clients = dict()
 def get_handler(socket: Socket) -> callable:
     async def echo(websocket):
         async for message in websocket:
-            send_command(message, socket)
+            result = send_command(message, socket)
+            await websocket.send(result)
 
     return echo
 
 
 async def main():
+    print("Starting WebsocketProxy.py")
     async with asyncio.TaskGroup() as tg:
         t1 = tg.create_task(open_robot_server())
         t2 = tg.create_task(start_webserver())
@@ -25,19 +26,16 @@ async def main():
 
 
 async def open_robot_server():
-    print("#### robot server")
     host = '0.0.0.0'
     port = 8000
-    # loop = asyncio.get_event_loop()
-    srv = await asyncio.start_server(client_connected_cb, host=host, port=port)
-    print("##### robot server started")
-    print(f"ip_address: {gethostbyname(gethostname())}")
+    srv = await asyncio.start_server(client_connected_callback, host=host, port=port)
+    print(f"ip_address of this container: {gethostbyname(gethostname())}")
     async with srv:
-        print('#### we in here Server started')
+        print('server listening for robot connections')
         await srv.serve_forever()
 
 
-def client_connected_cb(client_reader, client_writer):
+def client_connected_callback(client_reader, client_writer):
     # Use peername as client ID
     print("########### We got a customer<<<<<<<<<<<<<")
     client_id = client_writer.get_extra_info('peername')
