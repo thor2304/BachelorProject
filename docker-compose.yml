@@ -29,4 +29,23 @@ services:
         target: /app
     tty: true
     stdin_open: true
+    profiles:
+        - ""
+  test:
+    command: ["python", "test.py"]
+    profiles: ["test"]
+    build:
+      context: ./python
+      dockerfile: Dockerfile
+    ports:
+      - "8767:8767"
+      - "8000:8000"
+    volumes:
+      - type: bind
+        source: ./python
+        target: /app
+    tty: true
+    stdin_open: true
 #https://github.com/urrsk/ursim_docker/blob/main/ursim/e-series/Dockerfile
+# To run test container, proxy has to be not running. Then run `docker compose up test -d` or `docker compose --profile test up -d`
+
