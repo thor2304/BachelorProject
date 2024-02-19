@@ -5,6 +5,8 @@ from time import sleep
 import select
 
 
+POLYSCOPE_IP = "polyscope"
+
 def get_socket(ip, port):
     print("hello there")
     try:
@@ -28,28 +30,29 @@ def get_socket(ip, port):
 
 def main():
     print("Starting")
-    host_ip: str = "polyscope"
-    interpreter_socket: Socket = get_interpreter_socket(host_ip)
+    interpreter_socket: Socket = get_interpreter_socket()
 
     interpreter_socket.close()
 
 
-def get_interpreter_socket(host_ip: str):
-    dashboard_socket = get_socket(host_ip, 29999)
+def get_interpreter_socket():
+
+
+    dashboard_socket = get_socket(POLYSCOPE_IP, 29999)
     sleep(5)
     send_command("power on", dashboard_socket)
     sleep(1)
     send_command("brake release", dashboard_socket)
     sleep(1)
 
-    secondary_socket = get_socket(host_ip, 30002)
+    secondary_socket = get_socket(POLYSCOPE_IP, 30002)
     send_command("interpreter_mode()", secondary_socket)
     sleep(2)
 
     # default port for socket
     port: int = 30020
 
-    return get_socket(host_ip, port)
+    return get_socket(POLYSCOPE_IP, port)
 
 
 def receive_input_commands(interpreter_socket):
