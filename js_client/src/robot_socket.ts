@@ -40,39 +40,13 @@ async function getInterpreterSocket(ip: string) {
 }
 
 async function testCommands() {
-    // const interpreterSocket = await getInterpreterSocket("localhost");
-    //
-    // interpreterSocket.onmessage = (event) => {
-    //     console.log(event.data);
-    // };
-
-
-    const commands = [
-        "movej([0.0, 1.57, 0.0, -1.57, 0.0, 0.0], a=1.4, v=1.05)",
-        "set_digital_out(0, True)",
-        "set_digital_out(1, False)",
-        "set_digital_out(2, True)",
-        "set_digital_out(3, True)",
-        "popup(\"post\",\"post\")"
-    ]
-
     const proxyServer = get_socket("localhost", 8767);
     proxyServer.onopen = () => {
         console.log('proxy server opened');
-        for (const command of commands) {
-            send(proxyServer, command);
-        }
         document.addEventListener('commandEntered', function (e: CustomEvent) {
             send(proxyServer, e.detail.text)
         })
     };
-
-    // interpreterSocket.onopen = () => {
-    //     console.log('interpreter socket opened');
-    //     for (const command of commands) {
-    //         send(interpreterSocket, command);
-    //     }
-    // };
 }
 
 
