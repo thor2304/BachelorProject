@@ -4,6 +4,7 @@ from websockets.server import serve
 from socket import socket as Socket
 from socket import gethostbyname, gethostname, AF_INET, SOCK_STREAM, error
 from RobotControl import send_command, get_interpreter_socket
+from SocketMessages import parse_command_message, AckResponse, Status
 
 clients = dict()
 
@@ -12,7 +13,14 @@ def get_handler(socket: Socket) -> callable:
     async def echo(websocket):
         async for message in websocket:
             result = send_command(message, socket)
-            await websocket.send(result)
+            # command = parse_command_message(message)
+            # result = send_command(command.data.command, socket)
+            # response = AckResponse(command.data.id, command.data.command, result)
+            response = AckResponse(1, message, result)
+            str_response = str(response)
+            print(f"Sending response: {str_response}")
+
+            await websocket.send(str_response)
 
     return echo
 

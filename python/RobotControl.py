@@ -120,13 +120,13 @@ def send_command(command: str, on_socket: Socket) -> str:
     print(f"Sending the following command: '{escape_string(command)}'")
     on_socket.send(command.encode())
     result = read_from_socket(on_socket)
-    out = result
+    out = ""
     count = 1
     while result != "nothing" and count < 2:
+        out += result
         print(f"Recieved {count}: {escape_string(result)}")
         result = read_from_socket(on_socket)
         count += 1
-        out += result
 
     return escape_string(out)
 

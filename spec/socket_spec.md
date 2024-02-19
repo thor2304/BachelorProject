@@ -10,6 +10,9 @@ The following message types will be used:
 - `feedback`
 - `robot_state`
 
+# Client sent
+
+---
 
 ## Command
 This is used for sending a command to the server. 
@@ -23,6 +26,10 @@ The server will respond with an `ack_response` message.
   }
 }
 ```
+
+# Server sent
+
+---
 
 ## Response
 ```json
@@ -54,7 +61,6 @@ The server will respond with an `ack_response` message.
 {
   "type": "robot_state",
   "data": {
-    "id": 1,
     "state": "running",
     "joints": [0, 0, 0, 0, 0, 0]
   }

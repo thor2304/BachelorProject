@@ -1,7 +1,19 @@
 function get_socket(ip: string, port: number) {
-    return new WebSocket(
+    const out = new WebSocket(
         `ws://${ip}:${port}`
     );
+
+    out.onmessage = (event) => {
+        const response = JSON.parse(event.data);
+
+
+
+        console.log(response);
+    }
+
+    console.log(out)
+
+    return out
 }
 
 /**
@@ -21,22 +33,6 @@ function send(socket: WebSocket, data: any) {
     console.log('sending command: ' + data)
 
     socket.send(data);
-}
-
-async function getInterpreterSocket(ip: string) {
-    const secondarySocket = get_socket(ip, 30002);
-
-    return new Promise((resolve, reject) => {
-        secondarySocket.onopen = () => {
-            console.log('secondary socket opened');
-            send(secondarySocket, 'interpreter_mode()');
-            const interpreterSocket = get_socket(ip, 30020);
-            resolve(interpreterSocket);
-        };
-        secondarySocket.onerror = (event) => {
-            reject(event);
-        }
-    })
 }
 
 async function testCommands() {
