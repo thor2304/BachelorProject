@@ -4,8 +4,8 @@ from time import sleep
 
 import select
 
-
 POLYSCOPE_IP = "polyscope"
+
 
 def get_socket(ip, port):
     print("hello there")
@@ -35,8 +35,16 @@ def main():
     interpreter_socket.close()
 
 
-def get_interpreter_socket():
+_interpreter_open = False
 
+
+def get_interpreter_socket():
+    # default port for socket
+    interpreter_port: int = 30020
+
+    global _interpreter_open
+    if _interpreter_open:
+        return get_socket(POLYSCOPE_IP, interpreter_port)
 
     dashboard_socket = get_socket(POLYSCOPE_IP, 29999)
     sleep(5)
@@ -49,10 +57,9 @@ def get_interpreter_socket():
     send_command("interpreter_mode()", secondary_socket)
     sleep(2)
 
-    # default port for socket
-    port: int = 30020
+    _interpreter_open = True
 
-    return get_socket(POLYSCOPE_IP, port)
+    return get_socket(POLYSCOPE_IP, interpreter_port)
 
 
 def receive_input_commands(interpreter_socket):
@@ -115,7 +122,6 @@ def send_command(command: str, on_socket: Socket):
         print(f"Recieved {count}: {result}")
         result = read_from_socket(on_socket)
         count += 1
-
 
 
 def read_from_socket(socket: Socket):
