@@ -1,4 +1,5 @@
-import {commandList} from "./input";
+import {createCommandMessage, parseMessage} from "./messageFactory";
+import {MessageType, Status} from "./messages";
 
 function get_socket(ip: string, port: number) {
     const out = new WebSocket(
@@ -6,7 +7,11 @@ function get_socket(ip: string, port: number) {
     );
 
     out.onmessage = (event) => {
-        const response = JSON.parse(event.data);
+        const response = parseMessage(event.data);
+        if (response.type !== MessageType.AckResponse) {
+            console.log('not an Ack_response message: ', response);
+            return
+        }
         const created = document.createElement('p');
         created.textContent = response.data.message;
         created.style.backgroundColor = (response.data.status === 'Ok') ? 'green' : 'red';
@@ -25,7 +30,7 @@ function get_socket(ip: string, port: number) {
  * @param socket {WebSocket}
  * @param data {string}
  */
-function send(socket: WebSocket, data: any) {
+function send(socket: WebSocket, data: string) {
     if (socket.readyState === WebSocket.CLOSED) {
         console.log('socket closed');
         return;
@@ -34,9 +39,11 @@ function send(socket: WebSocket, data: any) {
         data += '\n';
     }
 
-    console.log('sending command: ' + data)
+    const commandMessage = createCommandMessage(1, data);
 
-    socket.send(data);
+    console.log('sending command: ' + JSON.stringify(commandMessage));
+
+    socket.send(JSON.stringify(commandMessage));
 }
 
 async function testCommands() {

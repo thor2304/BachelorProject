@@ -12,7 +12,9 @@ clients = dict()
 def get_handler(socket: Socket) -> callable:
     async def echo(websocket):
         async for message in websocket:
-            result = send_command(message, socket)
+            command_message = parse_command_message(message)
+            command = command_message.data.command
+            result = send_command(command, socket)
             # command = parse_command_message(message)
             # result = send_command(command.data.command, socket)
             # response = AckResponse(command.data.id, command.data.command, result)

@@ -19,7 +19,7 @@ This is used for sending a command to the server.
 The server will respond with an `ack_response` message.
 ```json
 {
-  "type": "command",
+  "type": "Command",
   "data": {
     "id": 1,
     "command": "set_digital_out(1,True)"
@@ -34,7 +34,7 @@ The server will respond with an `ack_response` message.
 ## Response
 ```json
 {
-  "type": "ack_response",
+  "type": "Ack_response",
   "data": {
     "id": 1,
     "command": "set_digital_out(1,True)",
@@ -48,7 +48,7 @@ The server will respond with an `ack_response` message.
 ## Feedback
 ```json
 {
-  "type": "feedback",
+  "type": "Feedback",
   "data": {
     "id": 1,
     "message": "message"
@@ -59,7 +59,7 @@ The server will respond with an `ack_response` message.
 ## Robot state
 ```json
 {
-  "type": "robot_state",
+  "type": "Robot_state",
   "data": {
     "state": "running",
     "joints": [0, 0, 0, 0, 0, 0]

@@ -1,6 +1,5 @@
 import json
 from enum import Enum, auto
-from typing import TypedDict
 
 
 class MessageType(Enum):
@@ -87,6 +86,6 @@ class RobotState:
 
 def parse_command_message(message: str) -> CommandMessage:
     parsed = json.loads(message)
-    if parsed["type"] != MessageType.Command:
-        raise ValueError("Message is not of type Command")
+    if parsed["type"] != MessageType.Command.name:
+        raise ValueError(f"Message type: {parsed['type']} is not of type Command {MessageType.Command.name}")
     return CommandMessage(parsed["data"]["id"], parsed["data"]["command"])
