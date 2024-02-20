@@ -1,3 +1,5 @@
+import {commandList} from "./input";
+
 function get_socket(ip: string, port: number) {
     const out = new WebSocket(
         `ws://${ip}:${port}`
@@ -5,10 +7,12 @@ function get_socket(ip: string, port: number) {
 
     out.onmessage = (event) => {
         const response = JSON.parse(event.data);
-
-
-
+        const created = document.createElement('p');
+        created.textContent = response.data.message;
+        created.style.backgroundColor = (response.data.status === 'Ok') ? 'green' : 'red';
+        created.style.color = 'black';
         console.log(response);
+        document.body.appendChild(created).scrollIntoView({behavior: "smooth"});
     }
 
     console.log(out)

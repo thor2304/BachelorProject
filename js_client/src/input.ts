@@ -1,5 +1,5 @@
 const inputField: HTMLInputElement = <HTMLInputElement> document.getElementById("inputField")
-const commandList: HTMLElement = document.getElementById("commandList");
+export const commandList: HTMLElement = document.getElementById("commandList");
 
 function getTextFromInput2(): string {
     const text: string = inputField.value;
