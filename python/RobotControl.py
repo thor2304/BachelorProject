@@ -142,9 +142,10 @@ def send_command(command: str, on_socket: Socket) -> str:
 
 
 def send_wrapped_command(command: str, on_socket: Socket) -> str:
-    send_command(f"socket_send_string(\"Starting command\")", on_socket)
-    send_command(command, on_socket)
-    return send_command(f"socket_send_string(\"Finished command\")", on_socket)
+    if command.endswith('\n'):
+        command = command[:-1]
+    command += ' socket_send_string(\"Finished sending command\")'
+    return send_command(command, on_socket)
 
 
 def read_from_socket(socket: Socket) -> str:
