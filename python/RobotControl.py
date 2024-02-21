@@ -5,6 +5,8 @@ from typing import Callable
 
 import select
 
+POLYSCOPE_IP = "polyscope"
+
 from ToolBox import escape_string
 
 
@@ -41,28 +43,36 @@ get_socket = create_get_socket_function()
 
 def main():
     print("Starting RobotControl.py")
-    host_ip: str = "polyscope"
-    interpreter_socket: Socket = get_interpreter_socket(host_ip)
+    interpreter_socket: Socket = get_interpreter_socket()
 
     interpreter_socket.close()
 
 
-def get_interpreter_socket(host_ip: str):
-    dashboard_socket = get_socket(host_ip, 29999)
+_interpreter_open = False
+
+
+def get_interpreter_socket():
+    # default port for socket
+    interpreter_port: int = 30020
+
+    global _interpreter_open
+    if _interpreter_open:
+        return get_socket(POLYSCOPE_IP, interpreter_port)
+
+    dashboard_socket = get_socket(POLYSCOPE_IP, 29999)
     sleep(5)
     send_command("power on", dashboard_socket)
     sleep(1)
     send_command("brake release", dashboard_socket)
     sleep(1)
 
-    secondary_socket = get_socket(host_ip, 30002)
+    secondary_socket = get_socket(POLYSCOPE_IP, 30002)
     send_command("interpreter_mode()", secondary_socket)
     sleep(2)
 
-    # default port for interpreter socket
-    port: int = 30020
+    _interpreter_open = True
 
-    return get_socket(host_ip, port)
+    return get_socket(POLYSCOPE_IP, interpreter_port)
 
 
 def receive_input_commands(interpreter_socket: Socket):
@@ -73,7 +83,7 @@ def receive_input_commands(interpreter_socket: Socket):
 
 
 def send_test_commands(interpreter_socket: Socket):
-    send_command("set_digital_out(0, False)\n", interpreter_socket)
+    send_wrapped_command("set_digital_out(0, False)\n", interpreter_socket)
 
     send_command("set_digital_out(1, False)\n", interpreter_socket)
     send_command("set_digital_out(2, False)\n", interpreter_socket)
@@ -131,10 +141,24 @@ def send_command(command: str, on_socket: Socket) -> str:
     return escape_string(out)
 
 
+def send_wrapped_command(command: str, on_socket: Socket) -> str:
+    send_command(f"socket_send_string(\"Starting command\")", on_socket)
+    send_command(command, on_socket)
+    return send_command(f"socket_send_string(\"Finished command\")", on_socket)
+
+
 def read_from_socket(socket: Socket) -> str:
     ready_to_read, ready_to_write, in_error = select.select([socket], [], [], 0.1)
     if ready_to_read:
-        return socket.recv(2048).decode()
+        message = socket.recv(2048)
+
+        try:
+            return message.decode()
+        except UnicodeDecodeError as e:
+            # Intentionally not returning anything.
+            # Returning nothing if a decode error occurs.
+            print(f"Error decoding message: {e}")
+
     return "nothing"
 
 

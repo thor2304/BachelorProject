@@ -3,8 +3,8 @@ import asyncio
 from websockets.server import serve
 from socket import socket as Socket
 from socket import gethostbyname, gethostname, AF_INET, SOCK_STREAM, error
-from RobotControl import send_command, get_interpreter_socket
 from SocketMessages import parse_command_message, AckResponse, Status
+from RobotControl import send_command, get_interpreter_socket, send_wrapped_command
 
 clients = dict()
 
@@ -38,14 +38,19 @@ async def main():
 async def open_robot_server():
     host = '0.0.0.0'
     port = 8000
-    srv = await asyncio.start_server(client_connected_callback, host=host, port=port)
+    srv = await asyncio.start_server(client_connected_cb, host=host, port=port)
     print(f"ip_address of this container: {gethostbyname(gethostname())}")
     async with srv:
         print('server listening for robot connections')
+        connect_to_robot_server(gethostbyname(gethostname()), port)
         await srv.serve_forever()
 
 
-def client_connected_callback(client_reader, client_writer):
+def connect_to_robot_server(host: str, port: int):
+    send_command(f"socket_open(\"{host}\", {port})\n", get_interpreter_socket())
+
+
+def client_connected_cb(client_reader, client_writer):
     # Use peername as client ID
     print("########### We got a customer<<<<<<<<<<<<<")
     client_id = client_writer.get_extra_info('peername')
@@ -83,7 +88,7 @@ async def client_task(reader, writer):
 
 async def start_webserver():
     print("Connecting to interpreter")
-    interpreter_socket: Socket = get_interpreter_socket("polyscope")
+    interpreter_socket: Socket = get_interpreter_socket()
     print("Starting websocket server")
     async with serve(get_handler(interpreter_socket), "0.0.0.0", 8767):
         await asyncio.Future()  # run forever
