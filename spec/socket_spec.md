@@ -10,7 +10,7 @@ The following message types will be used:
 - `feedback`
 - `robot_state`
 
-# Client sent
+# Client sent -> Backend
 
 ---
 
@@ -27,7 +27,7 @@ The server will respond with an `ack_response` message.
 }
 ```
 
-# Server sent
+# Server sent -> Client
 
 ---
 
@@ -38,7 +38,7 @@ The server will respond with an `ack_response` message.
   "data": {
     "id": 1,
     "command": "set_digital_out(1,True)",
-    "status": "ok or error",
+    "status": "Enum<Ok|Error>",
     "message": "optional message"
   }
 }
@@ -57,12 +57,41 @@ The server will respond with an `ack_response` message.
 ```
 
 ## Robot state
+Very rough, not thought through or implemented yet.
 ```json
 {
   "type": "Robot_state",
   "data": {
     "state": "running",
     "joints": [0, 0, 0, 0, 0, 0]
+  }
+}
+```
+
+
+# Robot sent -> Backend
+
+---
+
+## Command finished
+```json
+{
+  "type": "Command_finished",
+  "data": {
+    "id": 1,
+    "command": "set_digital_out(1,True)",
+    "variables": [
+      {
+        "name": "var1",
+        "type": "Enum<string|number|bool|array|pose>",
+        "value": "string|number|bool|array|pose"
+      },
+      {
+        "name": "var2",
+        "type": "Enum<string|number|bool|array|pose>",
+        "value": "string|number|bool|array|pose"
+      }
+    ]
   }
 }
 ```

@@ -13,11 +13,11 @@ export function parseMessage(message: string): Message {
 
     switch (parsed.type) {
         case "Ack_response":
-            return createAckResponseMessage(parsed);
+            return parseAckResponseMessage(parsed);
         case "Feedback":
-            return createFeedbackMessage(parsed);
+            return parseFeedbackMessage(parsed);
         case "Robot_state":
-            return createRobotStateMessage(parsed);
+            return parseRobotStateMessage(parsed);
         default:
             throw new Error(`Invalid message type: ${parsed.type}`);
     }
@@ -42,43 +42,50 @@ export function createCommandMessage(id: number, command: string): CommandMessag
 
 
 
-function createAckResponseMessage(message: any): AckResponseMessage {
+function parseAckResponseMessage(message: any): AckResponseMessage {
     if (message.type !== "Ack_response") {
         throw new Error(`Invalid message type: ${message.type}`);
     }
     return {
         type: MessageType.AckResponse,
         data: {
-            id: 1,
+            id: noneGuard(message.data.id),
             status: parseStatus(message.data.status),
-            command: message.data.command,
-            message: message.data.message
+            command: noneGuard(message.data.command),
+            message: noneGuard(message.data.message)
         }
     };
 }
 
-function createFeedbackMessage(message: any): FeedbackMessage {
+function parseFeedbackMessage(message: any): FeedbackMessage {
     if (message.type !== "Feedback") {
         throw new Error(`Invalid message type: ${message.type}`);
     }
     return {
         type: MessageType.Feedback,
         data: {
-            id: 1,
-            message: message.data.message
+            id: noneGuard(message.data.id),
+            message: noneGuard(message.data.message)
         }
     };
 }
 
-function createRobotStateMessage(message: any): RobotStateMessage {
+function noneGuard(value: any): any {
+    if (value === null || value === undefined) {
+        throw new Error("Unexpected null or undefined value");
+    }
+    return value;
+}
+
+function parseRobotStateMessage(message: any): RobotStateMessage {
     if (message.type !== "Robot_state") {
         throw new Error(`Invalid message type: ${message.type}`);
     }
     return {
         type: MessageType.RobotState,
         data: {
-            state: message.data.state,
-            joints: message.data.joints
+            state: noneGuard(message.data.state),
+            joints: noneGuard(message.data.joints)
         }
     };
 }
