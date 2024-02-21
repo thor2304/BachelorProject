@@ -7,7 +7,7 @@ import select
 
 POLYSCOPE_IP = "polyscope"
 
-from ToolBox import escape_string
+from ToolBox import escape_string, time_print
 
 
 def create_get_socket_function() -> Callable[[str, int], Socket]:
@@ -133,7 +133,7 @@ def send_command(command: str, on_socket: Socket) -> str:
     out = result
     count = 1
     while result != "nothing" and count < 2:
-        print(f"Recieved {count}: {escape_string(result)}")
+        time_print(f"Recieved {count}: {escape_string(result)}")
         result = read_from_socket(on_socket)
         count += 1
         out += result
