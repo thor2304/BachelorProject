@@ -1,5 +1,8 @@
-import {createCommandMessage, parseMessage} from "./messageFactory";
-import {MessageType, Status} from "./messages";
+import {createCommandMessage, parseMessage} from "./messageHandling/messageFactory";
+import {Message, MessageType} from "./messageHandling/messageDefinitions";
+import {handleAckResponseMessage} from "./messageHandling/AckResponseHandler";
+import {handleFeedbackMessage} from "./messageHandling/FeedbackMessageHandler";
+import {handleRobotStateMessage} from "./messageHandling/RobotStateMessageHandler";
 
 function get_socket(ip: string, port: number) {
     const out = new WebSocket(
@@ -8,16 +11,8 @@ function get_socket(ip: string, port: number) {
 
     out.onmessage = (event) => {
         const response = parseMessage(event.data);
-        if (response.type !== MessageType.AckResponse) {
-            console.log('not an Ack_response message: ', response);
-            return
-        }
-        const created = document.createElement('p');
-        created.textContent = response.data.message;
-        created.style.backgroundColor = (response.data.status === 'Ok') ? 'green' : 'red';
-        created.style.color = 'black';
-        console.log(response);
-        document.body.appendChild(created).scrollIntoView({behavior: "smooth"});
+       handleMessageFromProxyServer(response);
+
     }
 
     console.log(out)
@@ -25,12 +20,29 @@ function get_socket(ip: string, port: number) {
     return out
 }
 
+function handleMessageFromProxyServer(message: Message) {
+    switch (message.type) {
+        case MessageType.AckResponse:
+            handleAckResponseMessage(message);
+            break;
+        case MessageType.Feedback:
+            handleFeedbackMessage(message);
+            break;
+        case MessageType.RobotState:
+            handleRobotStateMessage(message);
+            break;
+        default:
+            console.log('invalid message type: ', message);
+    }
+}
+
 /**
  *
  * @param socket {WebSocket}
  * @param data {string}
+ * @param id {number}
  */
-function send(socket: WebSocket, data: string) {
+function send(socket: WebSocket, data: string, id: number) {
     if (socket.readyState === WebSocket.CLOSED) {
         console.log('socket closed');
         return;
@@ -39,7 +51,7 @@ function send(socket: WebSocket, data: string) {
         data += '\n';
     }
 
-    const commandMessage = createCommandMessage(1, data);
+    const commandMessage = createCommandMessage(id, data);
 
     console.log('sending command: ' + JSON.stringify(commandMessage));
 
@@ -51,7 +63,7 @@ async function testCommands() {
     proxyServer.onopen = () => {
         console.log('proxy server opened');
         document.addEventListener('commandEntered', function (e: CustomEvent) {
-            send(proxyServer, e.detail.text)
+            send(proxyServer, e.detail.text, e.detail.id)
         })
     };
 }

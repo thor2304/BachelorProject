@@ -105,7 +105,7 @@ def send_test_commands(interpreter_socket: Socket):
 
     function_def_no_new_line = (
         "def test():"
-        " a = True "
+        " out = "
         " set_digital_out(2, a)                                                      "
         " set_digital_out(1, True) "
         " end "
@@ -115,7 +115,15 @@ def send_test_commands(interpreter_socket: Socket):
 
     function_connect_to_socket = (
         'socket_open("proxy","8000")\n'
-        'socket_send_string("Hello from UR")\n'
+        'def send(id):'
+        'out = "{\\"type\\": \\"Command\\", \\"data\\": {\\"id\\": " + id + ", \\"var1\\": " + var1 + "}}"'
+        'socket_send_string(out)'
+        'end'
+        'thread sending():'
+        'while True:'
+        'send(10)'
+        'end'
+        'end'
     )
 
     send_command("test()\n", interpreter_socket)
