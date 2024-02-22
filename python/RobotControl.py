@@ -52,6 +52,8 @@ _interpreter_open = False
 
 
 def get_interpreter_socket():
+    """This function is safe to call multiple times.
+    If the interpreter_socket is opened, then it will be returned from cache"""
     # default port for socket
     interpreter_port: int = 30020
 
@@ -60,11 +62,11 @@ def get_interpreter_socket():
         return get_socket(POLYSCOPE_IP, interpreter_port)
 
     dashboard_socket = get_socket(POLYSCOPE_IP, 29999)
-    sleep(5)
+    # sleep(5)
     send_command("power on", dashboard_socket)
-    sleep(1)
+    # sleep(1)
     send_command("brake release", dashboard_socket)
-    sleep(1)
+    # sleep(1)
 
     secondary_socket = get_socket(POLYSCOPE_IP, 30002)
     send_command("interpreter_mode()", secondary_socket)
@@ -142,7 +144,7 @@ def send_command(command: str, on_socket: Socket) -> str:
     count = 1
     while result != "nothing" and count < 2:
         out += result
-        time_print(f"Recieved {count}: {escape_string(result)}")
+        time_print(f"Received {count}: {escape_string(result)}")
         result = read_from_socket(on_socket)
         count += 1
 
@@ -152,8 +154,42 @@ def send_command(command: str, on_socket: Socket) -> str:
 def send_wrapped_command(command: str, on_socket: Socket) -> str:
     if command.endswith('\n'):
         command = command[:-1]
-    command += ' socket_send_string(\"Finished sending command\")'
-    return send_command(command, on_socket)
+    finish_text = ' socket_send_string("Finished sending command ")'
+    command += finish_text
+    test_string = ('hello there "backend" hows it hanging? this was sent as a "stringified" message with the '
+                   '"new" implementation. it is "fancy"')
+    wrapping = URIFY_return_string(test_string)
+    command += wrapping
+
+    extra_len = len(wrapping) + len(finish_text) + 1  # the 1 is to remove the trailing \n character
+
+    response = send_command(command, on_socket)
+
+    return response[0:-extra_len]
+
+
+def URIFY_return_string(input: str) -> str:
+    between_quotes = input.split('"')
+    if len(between_quotes) == 1:
+        return create_socket_send_string(input)
+
+    first = between_quotes.pop(0)
+    out = create_socket_send_string(first)
+    for part in between_quotes:
+        out += create_quote_send()
+        out += create_socket_send_string(part)
+
+    return out
+
+
+def create_socket_send_string(string_to_send: str) -> str:
+    if string_to_send == "":
+        return ""
+    return f" socket_send_string(\"{string_to_send}\") "
+
+
+def create_quote_send() -> str:
+    return " socket_send_byte(34) "
 
 
 def read_from_socket(socket: Socket) -> str:
