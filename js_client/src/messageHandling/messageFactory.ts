@@ -6,7 +6,7 @@ import {
     MessageType,
     RobotStateMessage,
     Status
-} from "./messages";
+} from "./messageDefinitions";
 
 export function parseMessage(message: string): Message {
     const parsed = JSON.parse(message);

@@ -14,12 +14,12 @@ def get_handler(socket: Socket) -> callable:
     async def echo(websocket):
         async for message in websocket:
             command_message = parse_command_message(message)
-            command = command_message.data.command
-            result = send_command(command, socket)
+            command_string = command_message.data.command
+            result = send_command(command_string, socket)
             # command = parse_command_message(message)
             # result = send_command(command.data.command, socket)
             # response = AckResponse(command.data.id, command.data.command, result)
-            response = AckResponse(1, message, result)
+            response = AckResponse(command_message.data.id, command_string, result)
             str_response = str(response)
             print(f"Sending response: {str_response}")
 
