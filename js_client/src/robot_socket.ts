@@ -11,8 +11,7 @@ function get_socket(ip: string, port: number) {
 
     out.onmessage = (event) => {
         const response = parseMessage(event.data);
-       handleMessageFromProxyServer(response);
-
+        handleMessageFromProxyServer(response);
     }
 
     console.log(out)

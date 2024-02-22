@@ -33,6 +33,23 @@ html, body {
   overflow: auto;
 }
 
+.response-list{
+  list-style-type: none;
+  padding: .25em;
+}
+
+.response{
+  padding: .25em;
+}
+
+.success-response{
+  background-color: lightgreen;
+}
+
+.error-response{
+  background-color: indianred;
+}
+
 #inputField {
   width: 100%;
   height: 15vh;

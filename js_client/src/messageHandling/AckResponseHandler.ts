@@ -1,6 +1,9 @@
 import {Message, MessageType} from "./messageDefinitions";
 import {getChildWithTag} from "../Toolbox/DomTools";
 
+const errorClass = "error-response"
+const successClass = "success-response"
+
 export function handleAckResponseMessage(message: Message): void {
     if (message.type !== MessageType.AckResponse) {
         console.log('not an Ack_response message: ', message);
@@ -17,15 +20,15 @@ export function handleAckResponseMessage(message: Message): void {
     if (!subList) {
         subList = document.createElement('ul');
         // move styling to css
-        subList.style.listStyleType = 'none';
-        subList.style.padding = '.25em';
+        subList.classList.add("response-list")
     }
     const subListItem = document.createElement('li');
 
     // Move styling to css
-    subListItem.style.backgroundColor = (message.data.status === 'Ok') ? 'green' : 'red';
+    subListItem.classList.add("response");
+    const classname = (message.data.status === 'Ok') ? successClass : errorClass
+    subListItem.classList.add(classname);
     subListItem.textContent = message.data.message;
-    subListItem.style.padding = '.25em';
 
     subList.appendChild(subListItem);
 
