@@ -5,7 +5,7 @@ module.exports = {
     mode: 'development', // For production, use 'production' (is set to development for dev server to work properly)
     entry: {
         input: './src/input.ts',
-        robot_socket: './src/robot_socket.js',
+        robot_socket: './src/robot_socket.ts',
         style: './src/style.css',
         robot_3d_plot: './src/robot3dplot.png',
     },

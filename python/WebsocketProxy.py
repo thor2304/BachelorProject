@@ -1,10 +1,11 @@
 import asyncio
-import sys
 
 from websockets.server import serve
 from socket import socket as Socket
 from socket import gethostbyname, gethostname, AF_INET, SOCK_STREAM, error
-from RobotControl import send_command, get_interpreter_socket
+from SocketMessages import parse_command_message, AckResponse, Status
+from RobotControl import send_command, get_interpreter_socket, send_wrapped_command
+from ToolBox import time_print
 
 clients = dict()
 
@@ -12,12 +13,23 @@ clients = dict()
 def get_handler(socket: Socket) -> callable:
     async def echo(websocket):
         async for message in websocket:
-            send_command(message, socket)
+            command_message = parse_command_message(message)
+            command_string = command_message.data.command
+            result = send_command(command_string, socket)
+            # command = parse_command_message(message)
+            # result = send_command(command.data.command, socket)
+            # response = AckResponse(command.data.id, command.data.command, result)
+            response = AckResponse(command_message.data.id, command_string, result)
+            str_response = str(response)
+            print(f"Sending response: {str_response}")
+
+            await websocket.send(str_response)
 
     return echo
 
 
 async def main():
+    print("Starting WebsocketProxy.py")
     async with asyncio.TaskGroup() as tg:
         t1 = tg.create_task(open_robot_server())
         t2 = tg.create_task(start_webserver())
@@ -25,16 +37,18 @@ async def main():
 
 
 async def open_robot_server():
-    print("#### robot server")
     host = '0.0.0.0'
     port = 8000
-    # loop = asyncio.get_event_loop()
     srv = await asyncio.start_server(client_connected_cb, host=host, port=port)
-    print("##### robot server started")
-    print(f"ip_address: {gethostbyname(gethostname())}")
+    print(f"ip_address of this container: {gethostbyname(gethostname())}")
     async with srv:
-        print('#### we in here Server started')
+        print('server listening for robot connections')
+        connect_to_robot_server(gethostbyname(gethostname()), port)
         await srv.serve_forever()
+
+
+def connect_to_robot_server(host: str, port: int):
+    send_command(f"socket_open(\"{host}\", {port})\n", get_interpreter_socket())
 
 
 def client_connected_cb(client_reader, client_writer):
@@ -70,12 +84,12 @@ async def client_task(reader, writer):
             print('Received EOF. Client disconnected.')
             return
         else:
-            print('Backend Received: {}'.format(data.decode()))
+            time_print('Backend Received: {}'.format(data.decode()))
 
 
 async def start_webserver():
     print("Connecting to interpreter")
-    interpreter_socket: Socket = get_interpreter_socket("polyscope")
+    interpreter_socket: Socket = get_interpreter_socket()
     print("Starting websocket server")
     async with serve(get_handler(interpreter_socket), "0.0.0.0", 8767):
         await asyncio.Future()  # run forever
