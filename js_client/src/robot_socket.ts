@@ -1,7 +1,28 @@
+import {createCommandMessage, parseMessage} from "./messageFactory";
+import {MessageType, Status} from "./messages";
+
 function get_socket(ip: string, port: number) {
-    return new WebSocket(
+    const out = new WebSocket(
         `ws://${ip}:${port}`
     );
+
+    out.onmessage = (event) => {
+        const response = parseMessage(event.data);
+        if (response.type !== MessageType.AckResponse) {
+            console.log('not an Ack_response message: ', response);
+            return
+        }
+        const created = document.createElement('p');
+        created.textContent = response.data.message;
+        created.style.backgroundColor = (response.data.status === 'Ok') ? 'green' : 'red';
+        created.style.color = 'black';
+        console.log(response);
+        document.body.appendChild(created).scrollIntoView({behavior: "smooth"});
+    }
+
+    console.log(out)
+
+    return out
 }
 
 /**
@@ -9,7 +30,7 @@ function get_socket(ip: string, port: number) {
  * @param socket {WebSocket}
  * @param data {string}
  */
-function send(socket: WebSocket, data: any) {
+function send(socket: WebSocket, data: string) {
     if (socket.readyState === WebSocket.CLOSED) {
         console.log('socket closed');
         return;
@@ -18,25 +39,11 @@ function send(socket: WebSocket, data: any) {
         data += '\n';
     }
 
-    console.log('sending command: ' + data)
+    const commandMessage = createCommandMessage(1, data);
 
-    socket.send(data);
-}
+    console.log('sending command: ' + JSON.stringify(commandMessage));
 
-async function getInterpreterSocket(ip: string) {
-    const secondarySocket = get_socket(ip, 30002);
-
-    return new Promise((resolve, reject) => {
-        secondarySocket.onopen = () => {
-            console.log('secondary socket opened');
-            send(secondarySocket, 'interpreter_mode()');
-            const interpreterSocket = get_socket(ip, 30020);
-            resolve(interpreterSocket);
-        };
-        secondarySocket.onerror = (event) => {
-            reject(event);
-        }
-    })
+    socket.send(JSON.stringify(commandMessage));
 }
 
 async function testCommands() {
