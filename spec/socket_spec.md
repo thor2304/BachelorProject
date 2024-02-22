@@ -83,8 +83,8 @@ Very rough, not thought through or implemented yet.
     "variables": [
       {
         "name": "var1",
-        "type": "Enum<string|number|bool|array|pose>",
-        "value": "string|number|bool|array|pose"
+        "type": "Enum<string|int|float|bool|array|pose>",
+        "value": "string|int|float|bool|array|pose"
       },
       {
         "name": "var2",
