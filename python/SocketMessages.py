@@ -8,7 +8,6 @@ class MessageType(Enum):
     Ack_response = auto()
     Feedback = auto()
     Robot_state = auto()
-    Command_finished = auto()
 
 
 class Status(Enum):
@@ -49,30 +48,6 @@ class RobotStateData:
     def __init__(self, state: str, joints: list[int, int, int, int, int, int]):
         self.state = state
         self.joints = joints
-
-
-class VariableTypes(Enum):
-    String = auto()
-    Integer = auto()
-    Float = auto()
-    Boolean = auto()
-    List = auto()
-    Pose = auto()
-
-
-# Missing pose type, but I am unsure of the format of the pose.
-class VariableObject:
-    def __init__(self, name: str, type: VariableTypes, value: str | int | float | bool | list[...]):
-        self.name = name
-        self.type = type
-        self.value = value
-
-
-class CommandFinishedData:
-    def __init__(self, id: int, command: str, variables: list[...: VariableObject]):
-        self.id = id
-        self.command = command
-        self.variables = variables
 
 
 class CommandMessage:
