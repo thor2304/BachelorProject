@@ -5,6 +5,9 @@ from typing import Callable
 
 import select
 
+from RobotSocketMessages import CommandFinished, VariableObject, VariableTypes
+from SocketMessages import CommandMessage
+
 POLYSCOPE_IP = "polyscope"
 
 from ToolBox import escape_string, time_print
@@ -151,19 +154,24 @@ def send_command(command: str, on_socket: Socket) -> str:
     return escape_string(out)
 
 
-def send_wrapped_command(command: str, on_socket: Socket) -> str:
-    if command.endswith('\n'):
-        command = command[:-1]
-    finish_text = ' socket_send_string("Finished sending command ")'
-    command += finish_text
-    test_string = ('hello there "backend" hows it hanging? this was sent as a "stringified" message with the '
-                   '"new" implementation. it is "fancy"')
-    wrapping = URIFY_return_string(test_string)
-    command += wrapping
+def send_wrapped_command(command: CommandMessage, on_socket: Socket) -> str:
+    command_message = command.data.command
+    if command_message.endswith('\n'):
+        command_message = command_message[:-1]
+    finish_command = CommandFinished(command.data.id, command_message,
+                                     tuple([VariableObject("var1", VariableTypes.String, "value1")]))
+    # finish_text = ' socket_send_string("Finished sending command ")'
+    # command_message += finish_text
+    # test_string = ('hello there "backend" hows it hanging? this was sent as a "stringified" message with the '
+    #                '"new" implementation. it is "fancy"')
+    # wrapping = URIFY_return_string(test_string)
+    # command_message += wrapping
+    wrapping = URIFY_return_string(str(finish_command))
+    command_message += wrapping
 
-    extra_len = len(wrapping) + len(finish_text) + 1  # the 1 is to remove the trailing \n character
+    extra_len = len(wrapping) + 1  # the 1 is to remove the trailing \n character
 
-    response = send_command(command, on_socket)
+    response = send_command(command_message, on_socket)
 
     return response[0:-extra_len]
 
@@ -174,11 +182,13 @@ def URIFY_return_string(input: str) -> str:
         return create_socket_send_string(input)
 
     first = between_quotes.pop(0)
-    out = create_socket_send_string(first)
+    out = " socket_send_byte(2) "
+    out += create_socket_send_string(first)
     for part in between_quotes:
         out += create_quote_send()
         out += create_socket_send_string(part)
 
+    out += " socket_send_byte(3) "
     return out
 
 

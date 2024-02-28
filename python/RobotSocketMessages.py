@@ -51,3 +51,4 @@ class CommandFinished:
                 "variables": [variable.dump() for variable in self.data.variables]
             }
         })
+

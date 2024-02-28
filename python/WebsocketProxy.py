@@ -16,7 +16,7 @@ def get_handler(socket: Socket) -> callable:
         async for message in websocket:
             command_message = parse_command_message(message)
             command_string = command_message.data.command
-            result = send_wrapped_command(command_string, socket)
+            result = send_wrapped_command(command_message, socket)
             # command = parse_command_message(message)
             # result = send_command(command.data.command, socket)
             # response = AckResponse(command.data.id, command.data.command, result)
@@ -90,6 +90,7 @@ async def client_task(reader, writer):
             return
         else:
             time_print('Backend Received: {}'.format(data.decode()))
+            print(f"Not decoded: {data}")
 
 
 async def start_webserver():
