@@ -91,11 +91,11 @@ async def client_task(reader, writer):
         if extra_data:
             data = extra_data + data
             extra_data = []
-            print(f"Extra data set to: {extra_data}")
+            print(f"Extra data added to data")
 
         # Check if the data recieved starts with the start byte
         if data[0] != 0x02:
-            print(f"Data not started with start byte: {data}")
+            print(f"Something is WRONG. Data not started with start byte: {data}")
 
         # Check if the data recieved ends with the end byte
         if data[-1] == 0x03:
