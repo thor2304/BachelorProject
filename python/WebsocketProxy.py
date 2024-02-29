@@ -1,4 +1,5 @@
 import asyncio
+from asyncio import StreamReader, StreamWriter
 from time import sleep
 
 from websockets.server import serve
@@ -9,7 +10,9 @@ from RobotControl import send_command, get_interpreter_socket, send_wrapped_comm
 from ToolBox import time_print
 
 clients = dict()
-
+_START_BYTE = b'\x02'
+_END_BYTE = b'\x03'
+_EMPTY_BYTE = b''
 
 def get_handler(socket: Socket) -> callable:
     async def echo(websocket):
@@ -54,7 +57,7 @@ def connect_to_robot_server(host: str, port: int):
     print(f"Manual delayed read resulted in: {read_from_socket(get_interpreter_socket())}")
 
 
-def client_connected_cb(client_reader, client_writer):
+def client_connected_cb(client_reader: StreamReader, client_writer: StreamWriter):
     # Use peername as client ID
     print("########### We got a customer<<<<<<<<<<<<<")
     client_id = client_writer.get_extra_info('peername')
@@ -77,46 +80,39 @@ def client_connected_cb(client_reader, client_writer):
     clients[client_id] = task
 
 
-async def client_task(reader, writer):
+async def client_task(reader: StreamReader, writer: StreamWriter):
     client_addr = writer.get_extra_info('peername')
     print('Start echoing back to {}'.format(client_addr))
     extra_data = []
 
     while True:
-        data = await reader.read(1024)
-        if data == b'':
+        data = await reader.read(16)
+
+        if data == _EMPTY_BYTE:
             print('Received EOF. Client disconnected.')
             return
 
         if extra_data:
             data = extra_data + data
             extra_data = []
-            print(f"Extra data added to data")
 
         # Check if the data recieved starts with the start byte
-        if data[0] != 0x02:
+        if data[0] != _START_BYTE[0]:
             print(f"Something is WRONG. Data not started with start byte: {data}")
 
-        # Check if the data recieved ends with the end byte
-        if data[-1] == 0x03:
-            # Else if the data contains the end byte, cut the data at the end byte
-            print(f"Data contained start and end byte: {data}")
-        elif 0x03 in data:
-            data = data[:data.index(0x03)]
-            print(f"Data without extra data: {data}")
-
-            extra_data = data[data.index(0x03):]
-
-            if extra_data[0] != 0x02:
-                print(f"Extra data does not start with a start byte???: {extra_data}")
-
-            if extra_data[0] == 0x02 and extra_data[-1] == 0x03:
-                print(f"Extra data: {extra_data}")
-            else:
-                print("Extra data does not start with start byte and does not end with a end byte")
-        elif 0x03 not in data:
-            print(f"data does not contain end byte: {data}")
+        if _END_BYTE not in data:
             extra_data = data
+        else:
+            # Split the data into messages within the data
+            list_of_data = data.split(_END_BYTE)
+
+            # If the last element is not empty, then it's not the end of the message
+            if list_of_data[len(list_of_data) - 1] != _EMPTY_BYTE:
+                extra_data = list_of_data.pop()
+
+            for message in list_of_data:
+                if message:
+                    print(f"Messages decoded: {message.decode()}")
 
 
 async def start_webserver():
