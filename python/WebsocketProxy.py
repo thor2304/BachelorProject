@@ -1,10 +1,11 @@
 import asyncio
+from time import sleep
 
 from websockets.server import serve
 from socket import socket as Socket
 from socket import gethostbyname, gethostname, AF_INET, SOCK_STREAM, error
 from SocketMessages import parse_command_message, AckResponse, Status
-from RobotControl import send_command, get_interpreter_socket, send_wrapped_command
+from RobotControl import send_command, get_interpreter_socket, send_wrapped_command, read_from_socket
 from ToolBox import time_print
 
 clients = dict()
@@ -49,6 +50,9 @@ async def open_robot_server():
 
 def connect_to_robot_server(host: str, port: int):
     send_command(f"socket_open(\"{host}\", {port})\n", get_interpreter_socket())
+    sleep(2)
+    print(
+        f"Manual delayed read from socket after the socket_open command: {read_from_socket(get_interpreter_socket())}")
 
 
 def client_connected_cb(client_reader, client_writer):

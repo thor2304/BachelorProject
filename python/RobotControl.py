@@ -60,11 +60,11 @@ def get_interpreter_socket():
         return get_socket(POLYSCOPE_IP, interpreter_port)
 
     dashboard_socket = get_socket(POLYSCOPE_IP, 29999)
-    sleep(5)
+    # sleep(5)
     send_command("power on", dashboard_socket)
-    sleep(1)
+    # sleep(1)
     send_command("brake release", dashboard_socket)
-    sleep(1)
+    # sleep(1)
 
     secondary_socket = get_socket(POLYSCOPE_IP, 30002)
     send_command("interpreter_mode()", secondary_socket)
