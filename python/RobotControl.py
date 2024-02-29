@@ -154,14 +154,18 @@ def send_command(command: str, on_socket: Socket) -> str:
     return escape_string(out)
 
 
+list_of_variables: list[VariableObject] = list()
+list_of_variables.append(VariableObject("__test__", VariableTypes.Integer, 2))
+
+
 def send_wrapped_command(command: CommandMessage, on_socket: Socket) -> str:
     command_message = command.data.command
     if command_message.endswith('\n'):
         command_message = command_message[:-1]
 
-    finish_command = CommandFinished(command.data.id, command_message,
-                                     tuple([VariableObject("var1", VariableTypes.String, "value1")]))
-    wrapping = URIFY_return_string(str(finish_command))
+    finish_command = CommandFinished(command.data.id, command_message, tuple(list_of_variables))
+    string_command = str(replace_variable_value_with_name_of_variable(finish_command))
+    wrapping = URIFY_return_string(string_command)
     command_message += wrapping
 
     extra_len = len(wrapping) + 1  # the 1 is to remove the trailing \n character
@@ -171,7 +175,19 @@ def send_wrapped_command(command: CommandMessage, on_socket: Socket) -> str:
     return response[0:-extra_len]
 
 
+def replace_variable_value_with_name_of_variable(command_finished: CommandFinished) -> str:
+    for variable in command_finished.data.variables:
+        variable.value = variable.name
+
+    print(f"Command finished: {command_finished}")
+
+    return str(command_finished)
+
+
 def URIFY_return_string(input: str) -> str:
+    var_name: str = ""
+    count = 0
+
     between_quotes = input.split('"')
     if len(between_quotes) == 1:
         return create_socket_send_string(input)
@@ -180,11 +196,36 @@ def URIFY_return_string(input: str) -> str:
     out = " socket_send_byte(2) "
     out += create_socket_send_string(first)
     for part in between_quotes:
-        out += create_quote_send()
-        out += create_socket_send_string(part)
+        if part == "name" and count < 1:
+            count = 4
+        if part == "value" and count < 1:
+            count = 4
+        count -= 1
+        if count == 1:
+            if var_name == "":
+                var_name = part
+                out += create_quote_send()
+                out += create_socket_send_string(part)
+            else:
+                out += create_socket_send_string_no_quotes(var_name)
+                print(f"Setting variable name: {var_name}")
+                var_name = ""
+        elif count == 0:
+            if var_name != "":
+                out += create_quote_send()
+            out += create_socket_send_string(part)
+        else:
+            out += create_quote_send()
+            out += create_socket_send_string(part)
 
     out += " socket_send_byte(3) "
     return out
+
+
+def create_socket_send_string_no_quotes(string_to_send: str) -> str:
+    if string_to_send == "":
+        return ""
+    return f" socket_send_string({string_to_send}) "
 
 
 def create_socket_send_string(string_to_send: str) -> str:

@@ -91,6 +91,7 @@ async def client_task(reader, writer):
         if extra_data:
             data = extra_data + data
             extra_data = []
+            print(f"Extra data set to: {extra_data}")
 
         # Check if the data recieved starts with the start byte
         if data[0] != 0x02:
