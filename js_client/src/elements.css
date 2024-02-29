@@ -1,0 +1,14 @@
+
+.slate {
+    background-color: var(--slate-background-color);
+    border-radius: .5em;
+    border: .2em solid var(--border-color);
+}
+
+.field {
+    background-color: var(--field-background-color);
+    border-radius: .5em;
+    border: .2em solid var(--border-color);
+    margin: 1em;
+}
+
