@@ -181,8 +181,6 @@ def send_wrapped_command(command: CommandMessage, on_socket: Socket) -> str:
     extra_len = len(wrapping) + 1  # the 1 is to remove the trailing \n character
 
     response = send_command(command_message, on_socket)
-    # Sending it twice to test backend reading
-    send_command(command_message, on_socket)
 
     return response[0:-extra_len]
 
