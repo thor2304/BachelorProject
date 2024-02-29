@@ -97,6 +97,7 @@ async def client_task(reader: StreamReader, writer: StreamWriter):
             extra_data = []
 
         # Check if the data recieved starts with the start byte
+        # When using _START_BYTE[0] we return the integer value of the byte in the ascii table, so here it returns 2
         if data[0] != _START_BYTE[0]:
             print(f"Something is WRONG. Data not started with start byte: {data}")
 
