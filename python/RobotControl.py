@@ -154,6 +154,7 @@ def send_command(command: str, on_socket: Socket) -> str:
     return escape_string(out)
 
 
+# This is a list of variables that are sent to the robot for it to sent it back to the proxy.
 list_of_variables: list[VariableObject] = list()
 list_of_variables.append(VariableObject("__test__", VariableTypes.Integer, 2))
 
@@ -185,20 +186,35 @@ def replace_variable_value_with_name_of_variable(command_finished: CommandFinish
 
 
 def URIFY_return_string(input: str) -> str:
+    """
+    This function takes a string and returns a string that can be sent to the robot and then sent back to the proxy.\n
+    The function does this by replacing all the quotes with socket_send_byte(34).\n
+    For values of variables sent, the function ensures that the variable's value is not quoted, so the robot returns the
+    actual value of the variable.
+
+    :param input: The string to be URIFYed for sending to the robot
+
+    :return: The URIFYed string that can be sent to the robot
+    """
+
+    # Variables to keep track of where we are in the string
     var_name: str = ""
     count = 0
 
+    # Split the string by quotes
     between_quotes = input.split('"')
     if len(between_quotes) == 1:
         return create_socket_send_string(input)
 
+    # The first part of the string is not between quotes, so we can just pop it off
     first = between_quotes.pop(0)
     out = " socket_send_byte(2) "
+
     out += create_socket_send_string(first)
     for part in between_quotes:
-        if part == "name" and count < 1:
+        if part == "name" and count < 1:  # count < 1 is to make sure that variable named name and value still work
             count = 4
-        if part == "value" and count < 1:
+        if part == "value" and count < 1:  # count < 1 is to make sure that variable named name and value still work
             count = 4
         count -= 1
         if count == 1:
