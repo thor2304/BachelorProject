@@ -29,8 +29,6 @@ def get_handler(socket: Socket) -> callable:
     return echo
 
 
-
-
 async def main():
     print("Starting WebsocketProxy.py")
     async with asyncio.TaskGroup() as tg:
@@ -82,15 +80,42 @@ def client_connected_cb(client_reader, client_writer):
 async def client_task(reader, writer):
     client_addr = writer.get_extra_info('peername')
     print('Start echoing back to {}'.format(client_addr))
+    extra_data = []
 
     while True:
         data = await reader.read(1024)
         if data == b'':
             print('Received EOF. Client disconnected.')
             return
-        else:
-            time_print('Backend Received: {}'.format(data.decode()))
-            print(f"Not decoded: {data}")
+
+        if extra_data:
+            data = extra_data + data
+            extra_data = []
+
+        # Check if the data recieved starts with the start byte
+        if data[0] != 0x02:
+            print(f"Data not started with start byte: {data}")
+
+        # Check if the data recieved ends with the end byte
+        if data[-1] == 0x03:
+            # Else if the data contains the end byte, cut the data at the end byte
+            print(f"Data contained start and end byte: {data}")
+        elif 0x03 in data:
+            data = data[:data.index(0x03)]
+            print(f"Data without extra data: {data}")
+
+            extra_data = data[data.index(0x03):]
+
+            if extra_data[0] != 0x02:
+                print(f"Extra data does not start with a start byte???: {extra_data}")
+
+            if extra_data[0] == 0x02 and extra_data[-1] == 0x03:
+                print(f"Extra data: {extra_data}")
+            else:
+                print("Extra data does not start with start byte and does not end with a end byte")
+        elif 0x03 not in data:
+            print(f"data does not contain end byte: {data}")
+            extra_data = data
 
 
 async def start_webserver():

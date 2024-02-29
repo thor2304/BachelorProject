@@ -158,14 +158,9 @@ def send_wrapped_command(command: CommandMessage, on_socket: Socket) -> str:
     command_message = command.data.command
     if command_message.endswith('\n'):
         command_message = command_message[:-1]
+
     finish_command = CommandFinished(command.data.id, command_message,
                                      tuple([VariableObject("var1", VariableTypes.String, "value1")]))
-    # finish_text = ' socket_send_string("Finished sending command ")'
-    # command_message += finish_text
-    # test_string = ('hello there "backend" hows it hanging? this was sent as a "stringified" message with the '
-    #                '"new" implementation. it is "fancy"')
-    # wrapping = URIFY_return_string(test_string)
-    # command_message += wrapping
     wrapping = URIFY_return_string(str(finish_command))
     command_message += wrapping
 
