@@ -11,6 +11,7 @@ function createPTagWithText2(text: string, id: number): void{
     const liElement: HTMLLIElement = document.createElement('li');
     liElement.id = `command-${id}`;
     liElement.textContent = text;
+    liElement.classList.add('field');
     commandList.appendChild(liElement).scrollIntoView({behavior: "smooth"})
 }
 
