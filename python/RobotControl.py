@@ -77,7 +77,16 @@ def get_interpreter_socket():
 
     _interpreter_open = True
 
-    return get_socket(POLYSCOPE_IP, interpreter_port)
+    interpreter_socket = get_socket(POLYSCOPE_IP, interpreter_port)
+
+    prepare_interpreter_session(interpreter_socket)
+
+    return interpreter_socket
+
+
+def prepare_interpreter_session(interpreter_socket: Socket):
+    ## Starting commands we want to send to the robot
+    send_command("__test__ = 2", interpreter_socket)
 
 
 def receive_input_commands(interpreter_socket: Socket):
@@ -165,7 +174,7 @@ def send_wrapped_command(command: CommandMessage, on_socket: Socket) -> str:
         command_message = command_message[:-1]
 
     finish_command = CommandFinished(command.data.id, command_message, tuple(list_of_variables))
-    string_command = str(replace_variable_value_with_name_of_variable(finish_command))
+    string_command = finish_command.dump_string()
     wrapping = URIFY_return_string(string_command)
     command_message += wrapping
 
@@ -176,15 +185,6 @@ def send_wrapped_command(command: CommandMessage, on_socket: Socket) -> str:
     send_command(command_message, on_socket)
 
     return response[0:-extra_len]
-
-
-def replace_variable_value_with_name_of_variable(command_finished: CommandFinished) -> str:
-    for variable in command_finished.data.variables:
-        variable.value = variable.name
-
-    print(f"Command finished: {command_finished}")
-
-    return str(command_finished)
 
 
 def URIFY_return_string(input: str) -> str:

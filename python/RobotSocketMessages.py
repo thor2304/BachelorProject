@@ -26,8 +26,15 @@ class VariableObject:
         return {
             "name": self.name,
             "type": self.variable_type.name,
-            "value": self.value
+            "value": self.name  # Intentionally using self.name for the robot to inject the value based on name.
         }
+
+    def __str__(self):
+        return  json.dumps({
+            "name": self.name,
+            "type": self.variable_type.name,
+            "value": self.value
+        })
 
 
 class CommandFinishedData:
@@ -48,7 +55,19 @@ class CommandFinished:
             "data": {
                 "id": self.data.id,
                 "command": self.data.command,
-                "variables": [variable.dump() for variable in self.data.variables]
+                "variables": [str(variable) for variable in self.data.variables]
             }
         })
 
+    def dump(self):
+        return {
+            "type": self.type.name,
+            "data": {
+                "id": self.data.id,
+                "command": self.data.command,
+                "variables": [variable.dump() for variable in self.data.variables]
+            }
+        }
+
+    def dump_string(self):
+        return json.dumps(self.dump())
