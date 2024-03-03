@@ -21,11 +21,13 @@ function createPTagWithText2(text: string, id: number): void{
 function saveCommandToHistory(command: string): void {
     if(command != ''){
         commandHistory.push(command);
+        historyIndex = commandHistory.length;
     }
 }
 
 let current_id: number = 0;
 inputField.addEventListener('keydown', function (e: KeyboardEvent): void {
+    console.log(commandHistory)
     switch (e.key) {
         case 'Enter':
             const customEvent: CustomEvent<{ text: string }> = new CustomEvent('commandEntered', {
@@ -40,13 +42,17 @@ inputField.addEventListener('keydown', function (e: KeyboardEvent): void {
             break;
         case 'ArrowUp':
             e.preventDefault();
-            historyIndex = (historyIndex === 0) ? commandHistory.length - 1 : --historyIndex;
-            inputField.value = commandHistory[historyIndex] || '';
+            if (commandHistory.length > 0) {
+                historyIndex = (historyIndex === 0) ? commandHistory.length - 1 : --historyIndex;
+                inputField.value = commandHistory[historyIndex];
+            }
             break;
         case 'ArrowDown':
             e.preventDefault();
-            historyIndex = (historyIndex === commandHistory.length - 1) ? 0 : ++historyIndex;
-            inputField.value = commandHistory[historyIndex] || '';
+            if (commandHistory.length > 0 && historyIndex < commandHistory.length ) {
+                historyIndex = (historyIndex === commandHistory.length - 1) ? 0 : ++historyIndex;
+                inputField.value = commandHistory[historyIndex];
+            }
             break;
     }
 })
