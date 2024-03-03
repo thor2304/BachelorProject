@@ -27,7 +27,6 @@ function saveCommandToHistory(command: string): void {
 
 let current_id: number = 0;
 inputField.addEventListener('keydown', function (e: KeyboardEvent): void {
-    console.log(commandHistory)
     switch (e.key) {
         case 'Enter':
             const customEvent: CustomEvent<{ text: string }> = new CustomEvent('commandEntered', {
