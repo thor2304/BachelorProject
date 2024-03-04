@@ -17,7 +17,7 @@ function createPTagWithText(text: string, id: number): void {
 }
 
 function sendCommand(command: string): void {
-    if(command === '') return;
+    if (command === '') return;
     const customEvent: CustomEvent<{ text: string }> = new CustomEvent('commandEntered', {
         detail: {
             text: command,
@@ -31,6 +31,12 @@ function sendCommand(command: string): void {
 
 function saveCommandToHistory(command: string): void {
     if (command != '') {
+        const existingIndex: number = commandHistory.indexOf(command);
+
+        if (existingIndex > -1) {
+            commandHistory.splice(existingIndex, 1);
+        }
+
         commandHistory.push(command);
         historyIndex = commandHistory.length;
     }
