@@ -1,14 +1,12 @@
 import asyncio
-from time import sleep
 from asyncio import StreamReader, StreamWriter
 from time import sleep
 
 from websockets.server import serve
 from socket import socket as Socket
-from socket import gethostbyname, gethostname, AF_INET, SOCK_STREAM, error
-from SocketMessages import parse_command_message, AckResponse, Status
+from socket import gethostbyname, gethostname
+from SocketMessages import parse_command_message, AckResponse
 from RobotControl import send_command, get_interpreter_socket, send_wrapped_command, read_from_socket
-from ToolBox import time_print
 from typing import Final
 
 clients = dict()
