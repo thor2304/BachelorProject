@@ -7,7 +7,10 @@ module.exports = {
         input: './src/input.ts',
         robot_socket: './src/robot_socket.ts',
         style: './src/style.css',
+        colors: './src/colors.css',
+        elements: './src/elements.css',
         robot_3d_plot: './src/robot3dplot.png',
+        dark_mode: './src/Toolbox/auto_dark_mode.ts',
     },
     devtool: 'inline-source-map',
     devServer: {
