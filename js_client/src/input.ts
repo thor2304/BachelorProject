@@ -69,7 +69,7 @@ inputField.addEventListener('keydown', function (e: KeyboardEvent): void {
             document.dispatchEvent(customEvent);
             break;
         case 'ArrowUp':
-            if (isCursorOnLine(this, targetDirection.up) || inputField.value === '') {
+            if (isCursorOnLine(this, targetDirection.up) || getTextFromInput2() === '') {
                 e.preventDefault();
                 if (commandHistory.length > 0) {
                     historyIndex = (historyIndex === 0) ? commandHistory.length - 1 : --historyIndex;
@@ -78,7 +78,7 @@ inputField.addEventListener('keydown', function (e: KeyboardEvent): void {
             }
             break;
         case 'ArrowDown':
-            if (isCursorOnLine(this, targetDirection.down) || inputField.value === '') {
+            if (isCursorOnLine(this, targetDirection.down) || getTextFromInput2() === '') {
                 e.preventDefault();
                 if (commandHistory.length > 0 && historyIndex < commandHistory.length) {
                     historyIndex = (historyIndex === commandHistory.length - 1) ? 0 : ++historyIndex;
