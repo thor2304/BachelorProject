@@ -48,16 +48,16 @@ enum targetDirection {
 }
 
 function isCursorOnLine(textarea: HTMLInputElement, direction: targetDirection): boolean {
-    const cursorPos = textarea.selectionStart;
-    const selectionEnd = textarea.selectionEnd;
-    const selectionStart = textarea.selectionStart;
+    const cursorPos: number = textarea.selectionStart;
+    const selectionEnd: number = textarea.selectionEnd;
+    const selectionStart: number = textarea.selectionStart;
 
     if (selectionStart !== selectionEnd) {
         return false;
     }
 
-    const firstNewLine = textarea.value.indexOf('\n');
-    const lastNewLine = textarea.value.lastIndexOf('\n');
+    const firstNewLine: number = textarea.value.indexOf('\n');
+    const lastNewLine: number = textarea.value.lastIndexOf('\n');
 
     if ((cursorPos <= firstNewLine || firstNewLine < 0) && direction === targetDirection.up) {
         return true;
