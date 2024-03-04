@@ -4,18 +4,29 @@ export const commandList: HTMLElement = document.getElementById("commandList");
 const commandHistory: string[] = [];
 let historyIndex: number = 0;
 
-function getTextFromInput2(): string {
-    const text: string = inputField.value.trim();
-    inputField.value = '';
-    return text;
+function getTextFromInput(): string {
+    return inputField.value.trim();
 }
 
-function createPTagWithText2(text: string, id: number): void {
+function createPTagWithText(text: string, id: number): void {
     const liElement: HTMLLIElement = document.createElement('li');
     liElement.id = `command-${id}`;
     liElement.textContent = text;
     liElement.classList.add('field');
     commandList.appendChild(liElement).scrollIntoView({behavior: "smooth"})
+}
+
+function sendCommand(command: string): void {
+    if(command === '') return;
+    const customEvent: CustomEvent<{ text: string }> = new CustomEvent('commandEntered', {
+        detail: {
+            text: command,
+            id: current_id++,
+        },
+    });
+    inputField.value = '';
+    saveCommandToHistory(command);
+    document.dispatchEvent(customEvent);
 }
 
 function saveCommandToHistory(command: string): void {
@@ -58,18 +69,11 @@ inputField.addEventListener('keydown', function (e: KeyboardEvent): void {
     switch (e.key) {
         case 'Enter':
             if (e.key === 'Enter' && e.shiftKey) return;
-            const customEvent: CustomEvent<{ text: string }> = new CustomEvent('commandEntered', {
-                detail: {
-                    text: getTextFromInput2(),
-                    id: current_id++,
-                },
-            });
             e.preventDefault();
-            saveCommandToHistory(customEvent.detail.text);
-            document.dispatchEvent(customEvent);
+            sendCommand(getTextFromInput());
             break;
         case 'ArrowUp':
-            if (isCursorOnLine(this, targetDirection.up) || getTextFromInput2() === '') {
+            if (isCursorOnLine(this, targetDirection.up) || getTextFromInput() === '') {
                 e.preventDefault();
                 if (commandHistory.length > 0) {
                     historyIndex = (historyIndex === 0) ? commandHistory.length - 1 : --historyIndex;
@@ -78,7 +82,7 @@ inputField.addEventListener('keydown', function (e: KeyboardEvent): void {
             }
             break;
         case 'ArrowDown':
-            if (isCursorOnLine(this, targetDirection.down) || getTextFromInput2() === '') {
+            if (isCursorOnLine(this, targetDirection.down) || getTextFromInput() === '') {
                 e.preventDefault();
                 if (commandHistory.length > 0 && historyIndex < commandHistory.length) {
                     historyIndex = (historyIndex === commandHistory.length - 1) ? 0 : ++historyIndex;
@@ -90,5 +94,5 @@ inputField.addEventListener('keydown', function (e: KeyboardEvent): void {
 })
 
 document.addEventListener('commandEntered', function (e: CustomEvent): void {
-    createPTagWithText2(e.detail.text, e.detail.id);
+    createPTagWithText(e.detail.text, e.detail.id);
 });
