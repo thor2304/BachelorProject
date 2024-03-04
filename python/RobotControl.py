@@ -224,7 +224,6 @@ def URIFY_return_string(input: str) -> str:
                 out += create_socket_send_string(part)
             else:
                 out += create_socket_send_string_no_quotes(var_name)
-                print(f"Setting variable name: {var_name}")
                 var_name = ""
         elif count == 0:
             if var_name != "":

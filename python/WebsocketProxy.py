@@ -8,11 +8,12 @@ from socket import gethostbyname, gethostname, AF_INET, SOCK_STREAM, error
 from SocketMessages import parse_command_message, AckResponse, Status
 from RobotControl import send_command, get_interpreter_socket, send_wrapped_command, read_from_socket
 from ToolBox import time_print
+from typing import Final
 
 clients = dict()
-_START_BYTE = b'\x02'
-_END_BYTE = b'\x03'
-_EMPTY_BYTE = b''
+_START_BYTE: Final = b'\x02'
+_END_BYTE: Final = b'\x03'
+_EMPTY_BYTE: Final = b''
 
 def get_handler(socket: Socket) -> callable:
     async def echo(websocket):
