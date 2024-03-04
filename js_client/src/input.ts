@@ -3,7 +3,6 @@ export const commandList: HTMLElement = document.getElementById("commandList");
 
 const commandHistory: string[] = [];
 let historyIndex: number = 0;
-let cursorPosRowNumber: number;
 
 function getTextFromInput2(): string {
     const text: string = inputField.value.trim();
