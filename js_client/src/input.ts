@@ -1,4 +1,4 @@
-const inputField: HTMLInputElement = <HTMLInputElement>document.getElementById("inputField")
+const inputField: HTMLTextAreaElement = <HTMLTextAreaElement>document.getElementById("inputField")
 export const commandList: HTMLElement = document.getElementById("commandList");
 
 const commandHistory: string[] = [];
@@ -47,7 +47,7 @@ enum targetDirection {
     down = 'down',
 }
 
-function isCursorOnLine(textarea: HTMLInputElement, direction: targetDirection): boolean {
+function isCursorOnLine(textarea: HTMLTextAreaElement, direction: targetDirection): boolean {
     const cursorPos: number = textarea.selectionStart;
     const selectionEnd: number = textarea.selectionEnd;
     const selectionStart: number = textarea.selectionStart;
