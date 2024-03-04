@@ -87,6 +87,7 @@ def get_interpreter_socket():
 def prepare_interpreter_session(interpreter_socket: Socket):
     ## Starting commands we want to send to the robot
     send_command("__test__ = 2", interpreter_socket)
+    send_command("__test2__ = \"f\"", interpreter_socket)
 
 
 def receive_input_commands(interpreter_socket: Socket):
@@ -166,6 +167,7 @@ def send_command(command: str, on_socket: Socket) -> str:
 # This is a list of variables that are sent to the robot for it to sent it back to the proxy.
 list_of_variables: list[VariableObject] = list()
 list_of_variables.append(VariableObject("__test__", VariableTypes.Integer, 2))
+list_of_variables.append(VariableObject("__test2__", VariableTypes.String, "f"))
 
 
 def send_wrapped_command(command: CommandMessage, on_socket: Socket) -> str:
@@ -174,7 +176,8 @@ def send_wrapped_command(command: CommandMessage, on_socket: Socket) -> str:
         command_message = command_message[:-1]
 
     finish_command = CommandFinished(command.data.id, command_message, tuple(list_of_variables))
-    string_command = finish_command.dump_string()
+    string_command = finish_command.dump_ur_string()
+    print(f"String command: {string_command}")
     wrapping = URIFY_return_string(string_command)
     command_message += wrapping
 
@@ -185,62 +188,83 @@ def send_wrapped_command(command: CommandMessage, on_socket: Socket) -> str:
     return response[0:-extra_len]
 
 
-def URIFY_return_string(input: str) -> str:
+def URIFY_return_string(string_to_urify: str) -> str:
     """
     This function takes a string and returns a string that can be sent to the robot and then sent back to the proxy.\n
     The function does this by replacing all the quotes with socket_send_byte(34).\n
     For values of variables sent, the function ensures that the variable's value is not quoted, so the robot returns the
     actual value of the variable.
 
-    :param input: The string to be URIFYed for sending to the robot
+    :param string_to_urify: The string to be URIFYed for sending to the robot
 
     :return: The URIFYed string that can be sent to the robot
     """
 
-    # Variables to keep track of where we are in the string
-    var_name: str = ""
-    count = 0
+    out = " socket_send_byte(2) "  # Start byte
 
-    # Split the string by quotes
-    between_quotes = input.split('"')
-    if len(between_quotes) == 1:
-        return create_socket_send_string(input)
+    list_of_strings = string_to_urify.split('\\"\\"')
 
-    # The first part of the string is not between quotes, so we can just pop it off
-    first = between_quotes.pop(0)
-    out = " socket_send_byte(2) "
+    def urify_string(string: str) -> str:
+        urified_string = ""
 
-    out += create_socket_send_string(first)
-    for part in between_quotes:
-        if part == "name" and count < 1:  # count < 1 is to make sure that variable named name and value still work
-            count = 4
-        if part == "value" and count < 1:  # count < 1 is to make sure that variable named name and value still work
-            count = 4
-        count -= 1
-        if count == 1:
-            if var_name == "":
-                var_name = part
-                out += create_quote_send()
-                out += create_socket_send_string(part)
-            else:
-                out += create_socket_send_string_no_quotes(var_name)
-                var_name = ""
-        elif count == 0:
-            if var_name != "":
-                out += create_quote_send()
-            out += create_socket_send_string(part)
+        # Split the string by quotes
+        between_quotes = string.split('"')
+        if len(between_quotes) == 1:
+            return create_socket_send_string(string)
+
+        first = between_quotes.pop(0)
+        if first != "":
+            urified_string += create_socket_send_string(first)
         else:
-            out += create_quote_send()
-            out += create_socket_send_string(part)
+            urified_string += create_quote_send()
 
-    out += " socket_send_byte(3) "
+        for part in between_quotes:
+            if part == "":
+                continue
+
+            urified_string += create_quote_send()
+            urified_string += create_socket_send_string(part)
+
+        return urified_string
+
+    for i in range(0, len(list_of_strings)):
+        if i % 2 == 0:
+            sub_string: str = list_of_strings[i]
+            if i < len(list_of_strings) - 1:
+                sub_string = sub_string[:-1]
+            if i > 0:
+                sub_string = sub_string[1:]
+
+            out += urify_string(sub_string)
+        else:
+            out += create_socket_send_string_variable(list_of_strings[i])
+
+    out += " socket_send_byte(3) "  # End byte
     return out
 
 
-def create_socket_send_string_no_quotes(string_to_send: str) -> str:
+def create_socket_send_string_variable(string_to_send: str) -> str:
     if string_to_send == "":
         return ""
-    return f" socket_send_string({string_to_send}) "
+
+    wrap_in_quotes = False
+    start_char = string_to_send[0]
+
+    match start_char:
+        case VariableTypes.String.value:
+            string_to_send = string_to_send[1:]
+            wrap_in_quotes = True
+        case VariableTypes.Integer.value | VariableTypes.Float.value | VariableTypes.Boolean.value | VariableTypes.List.value | VariableTypes.Pose.value:
+            string_to_send = string_to_send[1:]
+        case _:
+            pass
+
+    out = f" socket_send_string({string_to_send}) "
+
+    if wrap_in_quotes:
+        out = create_quote_send() + out + create_quote_send()
+
+    return out
 
 
 def create_socket_send_string(string_to_send: str) -> str:
