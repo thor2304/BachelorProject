@@ -12,3 +12,7 @@
     margin: 1em;
 }
 
+code {
+    font-size: 1em;
+    color: var(--text-on-background-color);
+}

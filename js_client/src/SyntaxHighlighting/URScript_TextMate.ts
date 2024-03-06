@@ -1,9 +1,11 @@
 // This textMate grammar has been copied from the extension made by Ahern Guo
-const grammar = {
-    "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
-    "name": "URScript",
-    "names": ["URScript"],
-    "extensions": [".urscript"],
+import {Grammar} from "@wooorm/starry-night";
+
+const grammar : Grammar = {
+    // "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+    // "name": "URScript",
+    "names": ["URScript", "urscript", "script"],
+    "extensions": [".urscript", ".script"],
     "scopeName": "source.urscript",
     "patterns": [
         {
@@ -124,7 +126,8 @@ const grammar = {
             "patterns": [
                 {
                     "begin": "\\b(def|thread)\\b",
-                    "end": "\\(.*\\):\\s*$",
+                    // "end": "\\(.*\\):\\s",
+                    "end": "\\(",
                     "beginCaptures": {
                         "1": {
                             "name": "keyword.control.urscript"
