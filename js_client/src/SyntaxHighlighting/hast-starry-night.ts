@@ -8,7 +8,7 @@ export async function highlightCommand(command: string): Promise<ChildNode> {
     await starryNight.register([urscript])
 
     const tree = starryNight.highlight(command, 'source.urscript')
-    console.log(tree, toHtml(tree))
+
 
     let htmlString = toHtml(tree)
     if (!(htmlString.toLowerCase().startsWith("<code>") || htmlString.toLowerCase().startsWith("<pre>"))){
@@ -24,7 +24,7 @@ export function highlightCommandIntoElement(command: string, element: HTMLElemen
     }
 
     highlightCommand(command).then((highlighted) => {
-        console.log(highlighted)
+
         element.appendChild(highlighted)
     })
 }
