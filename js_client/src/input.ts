@@ -1,3 +1,4 @@
+import {highlightCommandIntoElement} from "./SyntaxHighlighting/hast-starry-night";
 const inputField: HTMLTextAreaElement = <HTMLTextAreaElement>document.getElementById("inputField")
 export const commandList: HTMLElement = document.getElementById("commandList");
 
@@ -18,8 +19,10 @@ function getTextFromInput(): string {
 function createPTagWithText(text: string, id: number): void {
     const liElement: HTMLLIElement = document.createElement('li');
     liElement.id = `command-${id}`;
-    liElement.textContent = text;
     liElement.classList.add('field');
+
+    highlightCommandIntoElement(text, liElement);
+
     commandList.appendChild(liElement).scrollIntoView({behavior: "smooth"})
 }
 
