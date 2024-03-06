@@ -204,29 +204,6 @@ def URIFY_return_string(string_to_urify: str) -> str:
 
     list_of_strings = string_to_urify.split('\\"\\"')
 
-    def urify_string(string: str) -> str:
-        urified_string = ""
-
-        # Split the string by quotes
-        between_quotes = string.split('"')
-        if len(between_quotes) == 1:
-            return create_socket_send_string(string)
-
-        first = between_quotes.pop(0)
-        if first != "":
-            urified_string += create_socket_send_string(first)
-        else:
-            urified_string += create_quote_send()
-
-        for part in between_quotes:
-            if part == "":
-                continue
-
-            urified_string += create_quote_send()
-            urified_string += create_socket_send_string(part)
-
-        return urified_string
-
     for i in range(0, len(list_of_strings)):
         if i % 2 == 0:
             sub_string: str = list_of_strings[i]
@@ -235,12 +212,36 @@ def URIFY_return_string(string_to_urify: str) -> str:
             if i > 0:
                 sub_string = sub_string[1:]
 
-            out += urify_string(sub_string)
+            out += _urify_string(sub_string)
         else:
             out += create_socket_send_string_variable(list_of_strings[i])
 
     out += " socket_send_byte(3) "  # End byte
     return out
+
+
+def _urify_string(string: str) -> str:
+    urified_string = ""
+
+    # Split the string by quotes
+    between_quotes = string.split('"')
+    if len(between_quotes) == 1:
+        return create_socket_send_string(string)
+
+    first = between_quotes.pop(0)
+    if first != "":
+        urified_string += create_socket_send_string(first)
+    else:
+        urified_string += create_quote_send()
+
+    for part in between_quotes:
+        if part == "":
+            continue
+
+        urified_string += create_quote_send()
+        urified_string += create_socket_send_string(part)
+
+    return urified_string
 
 
 def create_socket_send_string_variable(string_to_send: str) -> str:
