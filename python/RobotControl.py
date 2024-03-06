@@ -75,6 +75,10 @@ def get_interpreter_socket():
     return get_socket(POLYSCOPE_IP, interpreter_port)
 
 
+def get_rtde_socket():
+    return get_socket(POLYSCOPE_IP, 30004)
+
+
 def receive_input_commands(interpreter_socket: Socket):
     for i in range(30):
         # print(my_socket.recv(2048))

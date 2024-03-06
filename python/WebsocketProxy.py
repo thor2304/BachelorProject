@@ -5,8 +5,10 @@ from websockets.server import serve
 from socket import socket as Socket
 from socket import gethostbyname, gethostname, AF_INET, SOCK_STREAM, error
 from SocketMessages import parse_command_message, AckResponse, Status
-from RobotControl import send_command, get_interpreter_socket, send_wrapped_command, read_from_socket
+from RobotControl import send_command, get_interpreter_socket, send_wrapped_command, read_from_socket, get_socket, \
+    get_rtde_socket
 from ToolBox import time_print
+from RtdeConnection import start_rtde_loop
 
 clients = dict()
 
@@ -34,6 +36,7 @@ async def main():
     async with asyncio.TaskGroup() as tg:
         t1 = tg.create_task(open_robot_server())
         t2 = tg.create_task(start_webserver())
+        t3 = tg.create_task(start_rtde_loop())
     pass
 
 

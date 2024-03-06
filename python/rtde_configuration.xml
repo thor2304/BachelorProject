@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<rtde_config>
+	<recipe key="state">
+		<field name="target_q" type="VECTOR6D"/>
+		<field name="target_qd" type="VECTOR6D"/>
+		<field name="output_int_register_0" type="INT32"/>
+	</recipe>
+</rtde_config>
