@@ -2,6 +2,7 @@
 <rtde_config>
 	<recipe key="state">
 		<field name="safety_status_bits" type="UINT32"/>
+		<field name="runtime_state" type="UINT32"/>
 		<field name="actual_q" type="VECTOR6D"/>
 	</recipe>
 </rtde_config>

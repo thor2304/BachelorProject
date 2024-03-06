@@ -1,6 +1,7 @@
 import json
 from builtins import list
 from enum import Enum, auto
+
 from rtde.serialize import DataObject
 
 
@@ -88,14 +89,28 @@ class StatusTypes(Enum):
 lookup_state_types: dict[int, StatusTypes] = {element.value: element for element in StatusTypes}
 
 
+class RuntimeStateTypes(Enum):
+    stopping = 0
+    stopped = 1
+    playing = 2
+    pausing = 3
+    paused = 4
+    resuming = 5
+
+
+lookup_runtime_state_types: dict[int, RuntimeStateTypes] = {element.value: element for element in RuntimeStateTypes}
+
+
 class RobotStateData:
-    def __init__(self, status: StatusTypes, joints: JointState):
+    def __init__(self, status: StatusTypes, runtime_state: RuntimeStateTypes, joints: JointState):
         self.status: StatusTypes = status
+        self.runtime_state: RuntimeStateTypes = runtime_state
         self.joints: JointState = joints
 
     def dump(self):
         return {
             "status": self.status.name,
+            "runtime_state": self.runtime_state.name,
             "joints": [self.joints.base, self.joints.shoulder, self.joints.elbow,
                        self.joints.wrist1, self.joints.wrist2, self.joints.wrist3]
         }
@@ -132,19 +147,18 @@ class Feedback:
 
 class TransmittedInformationOptions(Enum):
     state = "safety_status_bits"
+    runtime_state = "runtime_state"
     joints = "actual_q"
-
-
-def raise_exception_when_called():
-    raise ValueError("Invalid argument")
 
 
 class RobotState:
     def __init__(self, state: DataObject):
         self.type = MessageType.Robot_state
         status: StatusTypes = ensure_type_of_status(state.__getattribute__(TransmittedInformationOptions.state.value))
+        runtime_state: RuntimeStateTypes = ensure_type_of_runtime_status(
+            state.__getattribute__(TransmittedInformationOptions.runtime_state.value))
         joints: JointState = ensure_type_of_joints(state.__getattribute__(TransmittedInformationOptions.joints.value))
-        self.data: RobotStateData = RobotStateData(status, joints)
+        self.data: RobotStateData = RobotStateData(status, runtime_state, joints)
 
     def __str__(self):
         return json.dumps({
@@ -159,6 +173,14 @@ def ensure_type_of_status(status: any) -> StatusTypes:
     if status not in lookup_state_types:
         raise ValueError(f"Status is not a known state: {status}")
     return lookup_state_types[status]
+
+
+def ensure_type_of_runtime_status(runtime_status: any) -> RuntimeStateTypes:
+    if not isinstance(runtime_status, int):
+        raise ValueError(f"Runtime status is not of type int: {runtime_status}")
+    if runtime_status not in lookup_runtime_state_types:
+        raise ValueError(f"Runtime status is not a known state: {runtime_status}")
+    return lookup_runtime_state_types[runtime_status]
 
 
 def ensure_type_of_joints(joints: any) -> JointState:
