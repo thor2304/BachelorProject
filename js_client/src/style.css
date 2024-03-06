@@ -1,6 +1,6 @@
 html, body {
     font-family: Arial, sans-serif;
-    /*background-color: var();*/
+
     margin: 0;
     padding: 10px;
 }
@@ -51,25 +51,16 @@ li.response::before{
     margin-right: .25em;
 }
 
-/*li.success-response {*/
-/*    background-color: lightgreen;*/
-/*}*/
+
 
 li.success-response::before {
     background-color: #2ac52a;
 }
 
 
-li.error-response {
-    /*background-color: indianred;*/
-}
 
-/*li.error-response::marker {*/
-/*    color: red;*/
-/*    font-size: 3em;*/
-/*    line-height: 1rem;*/
-/*    text-align: center;*/
-/*}*/
+
+
 
 li.error-response::before {
     background-color: #c52a2a;

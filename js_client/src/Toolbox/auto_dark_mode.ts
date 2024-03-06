@@ -2,9 +2,9 @@
 //https://www.cssscript.com/automatic-dark-mode-bootstrap/
 
 ;(function () {
-    console.log('auto dark mode')
+
     const htmlElement = document.querySelector("html")
-    console.log(htmlElement, htmlElement.getAttribute("data-bs-theme"))
+
     if(htmlElement.getAttribute("data-bs-theme") === 'auto') {
         function updateTheme() {
             document.querySelector("html").setAttribute("data-bs-theme",
