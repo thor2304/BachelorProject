@@ -62,8 +62,8 @@ Very rough, not thought through or implemented yet.
 {
   "type": "Robot_state",
   "data": {
-    "state": "running",
-    "joints": [0, 0, 0, 0, 0, 0]
+    "status": "reduced_mode",
+    "joints": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
   }
 }
 ```

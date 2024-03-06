@@ -26,6 +26,8 @@ import sys
 import rtde.rtde as rtde
 import rtde.rtde_config as rtde_config
 
+from SocketMessages import RobotState
+
 sys.path.append("..")
 
 from RobotControl import POLYSCOPE_IP
@@ -36,6 +38,7 @@ config_filename = "rtde_configuration.xml"
 
 conf = rtde_config.ConfigFile(config_filename)
 state_names, state_types = conf.get_recipe("state")
+
 
 
 async def start_rtde_loop():
@@ -64,10 +67,9 @@ async def start_rtde_loop():
 
     while True:
         state = con.receive()
-        print(f"Initial robot state: {state}\n"
-              f"Output_int_register_0: {state.output_int_register_0}\n"
-              f"Target_q: {state.target_q}\n"
-              f"Target_qd: {state.target_qd}")
+        robot_state = RobotState(state)
+        print(f"Robot state: {str(robot_state)}")
+
         await asyncio.sleep(1)
 
     con.send_pause()
