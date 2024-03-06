@@ -91,3 +91,7 @@ li.error-response::before {
     width: 100%;
     box-sizing: border-box;
 }
+
+.command-highlighted {
+    background-color: var(--group-A-active-color) !important;
+}

@@ -1,4 +1,5 @@
 import asyncio
+from asyncio import StreamReader, StreamWriter
 from time import sleep
 
 from websockets.server import serve
@@ -9,16 +10,22 @@ from RobotControl import send_command, get_interpreter_socket, send_wrapped_comm
     get_rtde_socket
 from ToolBox import time_print
 from RtdeConnection import start_rtde_loop
+from socket import gethostbyname, gethostname
+from SocketMessages import parse_command_message, AckResponse
+from RobotControl import send_command, get_interpreter_socket, send_wrapped_command, read_from_socket
+from typing import Final
 
 clients = dict()
-
+_START_BYTE: Final = b'\x02'
+_END_BYTE: Final = b'\x03'
+_EMPTY_BYTE: Final = b''
 
 def get_handler(socket: Socket) -> callable:
     async def echo(websocket):
         async for message in websocket:
             command_message = parse_command_message(message)
             command_string = command_message.data.command
-            result = send_command(command_string, socket)
+            result = send_wrapped_command(command_message, socket)
             # command = parse_command_message(message)
             # result = send_command(command.data.command, socket)
             # response = AckResponse(command.data.id, command.data.command, result)
@@ -53,12 +60,11 @@ async def open_robot_server():
 
 def connect_to_robot_server(host: str, port: int):
     send_command(f"socket_open(\"{host}\", {port})\n", get_interpreter_socket())
-    sleep(2)
-    print(
-        f"Manual delayed read from socket after the socket_open command: {read_from_socket(get_interpreter_socket())}")
+    sleep(1)
+    print(f"Manual delayed read resulted in: {read_from_socket(get_interpreter_socket())}")
 
 
-def client_connected_cb(client_reader, client_writer):
+def client_connected_cb(client_reader: StreamReader, client_writer: StreamWriter):
     # Use peername as client ID
     print("########### We got a customer<<<<<<<<<<<<<")
     client_id = client_writer.get_extra_info('peername')
@@ -81,17 +87,40 @@ def client_connected_cb(client_reader, client_writer):
     clients[client_id] = task
 
 
-async def client_task(reader, writer):
+async def client_task(reader: StreamReader, writer: StreamWriter):
     client_addr = writer.get_extra_info('peername')
     print('Start echoing back to {}'.format(client_addr))
+    extra_data = []
 
     while True:
-        data = await reader.read(1024)
-        if data == b'':
+        data = await reader.read(16)
+
+        if data == _EMPTY_BYTE:
             print('Received EOF. Client disconnected.')
             return
+
+        if extra_data:
+            data = extra_data + data
+            extra_data = []
+
+        # Check if the data recieved starts with the start byte
+        # When using _START_BYTE[0] we return the integer value of the byte in the ascii table, so here it returns 2
+        if data[0] != _START_BYTE[0]:
+            print(f"Something is WRONG. Data not started with start byte: {data}")
+
+        if _END_BYTE not in data:
+            extra_data = data
         else:
-            time_print('Backend Received: {}'.format(data.decode()))
+            # Split the data into messages within the data
+            list_of_data = data.split(_END_BYTE)
+
+            # If the last element is not empty, then it's not the end of the message
+            if list_of_data[len(list_of_data) - 1] != _EMPTY_BYTE:
+                extra_data = list_of_data.pop()
+
+            for message in list_of_data:
+                if message:
+                    print(f"Messages decoded: {message.decode()}")
 
 
 async def start_webserver():
