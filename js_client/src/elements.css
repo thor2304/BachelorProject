@@ -12,7 +12,15 @@
     margin: 1em;
 }
 
-code {
-    font-size: 1em;
+pre code {
+    font-size: 1.15em;
     color: var(--text-on-background-color);
+}
+
+pre{
+    padding-left: .75em;
+    margin-bottom: 0;
+    border-bottom-color: var(--border-color);
+    border-bottom-style: solid;
+    border-bottom-width: .25em;
 }

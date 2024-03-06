@@ -1,6 +1,5 @@
 import {common, createStarryNight} from '@wooorm/starry-night'
 import {toHtml} from 'hast-util-to-html'
-import {htmlToElement} from "./HighlightHistory";
 
 import urscript from "./URScript_TextMate"
 
@@ -12,8 +11,8 @@ export async function highlightCommand(command: string): Promise<ChildNode> {
     console.log(tree, toHtml(tree))
 
     let htmlString = toHtml(tree)
-    if (!htmlString.toLowerCase().startsWith("<code>")){
-        htmlString = `<code>${htmlString}</code>`
+    if (!(htmlString.toLowerCase().startsWith("<code>") || htmlString.toLowerCase().startsWith("<pre>"))){
+        htmlString = `<pre><code>${htmlString}</code></pre>`
     }
 
     return htmlToElement(htmlString)
@@ -28,4 +27,21 @@ export function highlightCommandIntoElement(command: string, element: HTMLElemen
         console.log(highlighted)
         element.appendChild(highlighted)
     })
+}
+
+/**
+ * Starting copied from: https://stackoverflow.com/a/35385518
+ *<br>
+ * But modified by me, to inject the language class into the code tag.<br>
+ * This is done to comply with best practices for accessibility on the web.
+ *
+ * @param {String} html representing a single element
+ * @return {Element}
+ */
+export function htmlToElement(html: string): ChildNode {
+    const template = document.createElement('template');
+    html = html.trim(); // Never return a text node of whitespace as the result
+    template.innerHTML = html;
+
+    return template.content.firstElementChild;
 }
