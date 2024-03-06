@@ -1,11 +1,13 @@
 const inputField: HTMLTextAreaElement = <HTMLTextAreaElement>document.getElementById("inputField")
 export const commandList: HTMLElement = document.getElementById("commandList");
 
+let current_id: number = 0;
+
 interface Command {
     text: string;
     id: number;
 }
-const commandHistory: Command[] = [];
+const commandInputHistory: Command[] = [];
 let historyIndex: number = 0;
 
 function getTextFromInput(): string {
@@ -35,28 +37,14 @@ function sendCommand(command: string): void {
 
 function saveCommandToHistory(command: string, commandId: number): void {
     if (command != '') {
-        const existingIndex: number = commandHistory.findIndex((item: Command): boolean => item.text === command);
+        const existingIndex: number = commandInputHistory.findIndex((item: Command): boolean => item.text === command);
 
         if (existingIndex > -1) {
-            commandHistory.splice(existingIndex, 1);
+            commandInputHistory.splice(existingIndex, 1);
         }
 
-        commandHistory.push({text: command, id: commandId});
-        historyIndex = commandHistory.length;
-    }
-}
-
-function highlightSelectedCommandItem(id: number) {
-    const selectedElement: HTMLElement = document.getElementById(`command-${id}`);
-    if(selectedElement) {
-        selectedElement.classList.add('command-highlighted');
-    }
-}
-
-function clearHighlightedCommandItems() {
-    const highlightedElement: HTMLElement = document.querySelector('.command-highlighted');
-    if(highlightedElement) {
-        highlightedElement.classList.remove('command-highlighted');
+        commandInputHistory.push({text: command, id: commandId});
+        historyIndex = commandInputHistory.length;
     }
 }
 
@@ -88,7 +76,37 @@ function isCursorOnFirstOrLastLine(textarea: HTMLTextAreaElement, direction: tar
     return false;
 }
 
-let current_id: number = 0;
+function inputHistoryNavigation(direction: targetDirection): boolean {
+    if (commandInputHistory.length > 0) {
+        if (direction === targetDirection.up) {
+            historyIndex = (historyIndex === 0) ? commandInputHistory.length - 1 : --historyIndex;
+            inputField.value = commandInputHistory[historyIndex].text;
+            return true;
+        }
+        if (direction === targetDirection.down && historyIndex < commandInputHistory.length) {
+            historyIndex = (historyIndex === commandInputHistory.length - 1) ? 0 : ++historyIndex;
+            inputField.value = commandInputHistory[historyIndex].text;
+            return true;
+        }
+        return false;
+    }
+    return false;
+}
+
+function highlightSelectedCommandItem(id: number) {
+    const selectedElement: HTMLElement = document.getElementById(`command-${id}`);
+    if(selectedElement) {
+        selectedElement.classList.add('command-highlighted');
+    }
+}
+
+function clearHighlightedCommandItems() {
+    const highlightedElement: HTMLElement = document.querySelector('.command-highlighted');
+    if(highlightedElement) {
+        highlightedElement.classList.remove('command-highlighted');
+    }
+}
+
 inputField.addEventListener('keydown', function (e: KeyboardEvent): void {
     clearHighlightedCommandItems();
     switch (e.key) {
@@ -100,20 +118,16 @@ inputField.addEventListener('keydown', function (e: KeyboardEvent): void {
         case 'ArrowUp':
             if (isCursorOnFirstOrLastLine(this, targetDirection.up) || getTextFromInput() === '') {
                 e.preventDefault();
-                if (commandHistory.length > 0) {
-                    historyIndex = (historyIndex === 0) ? commandHistory.length - 1 : --historyIndex;
-                    inputField.value = commandHistory[historyIndex].text;
-                    highlightSelectedCommandItem(commandHistory[historyIndex].id);
+                if (inputHistoryNavigation(targetDirection.up)) {
+                    highlightSelectedCommandItem(commandInputHistory[historyIndex].id);
                 }
             }
             break;
         case 'ArrowDown':
             if (isCursorOnFirstOrLastLine(this, targetDirection.down) || getTextFromInput() === '') {
                 e.preventDefault();
-                if (commandHistory.length > 0 && historyIndex < commandHistory.length) {
-                    historyIndex = (historyIndex === commandHistory.length - 1) ? 0 : ++historyIndex;
-                    inputField.value = commandHistory[historyIndex].text;
-                    highlightSelectedCommandItem(commandHistory[historyIndex].id);
+                if (inputHistoryNavigation(targetDirection.down)) {
+                    highlightSelectedCommandItem(commandInputHistory[historyIndex].id);
                 }
             }
             break;
