@@ -7,12 +7,16 @@ class RobotSocketMessageTypes(Enum):
 
 
 class VariableTypes(Enum):
-    String = auto()
-    Integer = auto()
-    Float = auto()
-    Boolean = auto()
-    List = auto()
-    Pose = auto()
+    """
+    This is a list of variable types that can be sent to the robot
+    Each type has a corresponding character that is used to identify the type
+    """
+    String = "<"
+    Integer = "|"
+    Float = "@"
+    Boolean = "£"
+    List = "?"
+    Pose = "!"
 
 
 class VariableObject:
@@ -29,6 +33,16 @@ class VariableObject:
             "value": self.value
         }
 
+    def __str__(self):
+        return json.dumps(self.dump())
+
+    def dump_ur_prep(self):
+        return {
+            "name": self.name,
+            "type": self.variable_type.name,
+            "value": f'\"\"{self.variable_type.value}{self.name}\"\"'
+        }
+
 
 class CommandFinishedData:
     def __init__(self, id: int, command: str, variables: tuple[VariableObject, ...]):
@@ -42,7 +56,16 @@ class CommandFinished:
         self.type = RobotSocketMessageTypes.Command_finished
         self.data: CommandFinishedData = CommandFinishedData(id, command, variables)
 
+    # Issue later should handle the case where the command contains a comment
+    def command_contains_comment(self):
+        if "#" in self.data.command:
+            return True
+        return False
+
     def __str__(self):
+        if self.command_contains_comment():
+            raise ValueError("Command contains comment")
+
         return json.dumps({
             "type": self.type.name,
             "data": {
@@ -51,3 +74,26 @@ class CommandFinished:
                 "variables": [variable.dump() for variable in self.data.variables]
             }
         })
+
+    def dump(self):
+        return {
+            "type": self.type.name,
+            "data": {
+                "id": self.data.id,
+                "command": self.data.command,
+                "variables": [variable.dump() for variable in self.data.variables]
+            }
+        }
+
+    def dump_ur_prep(self):
+        return {
+            "type": self.type.name,
+            "data": {
+                "id": self.data.id,
+                "command": self.data.command,
+                "variables": [variable.dump_ur_prep() for variable in self.data.variables]
+            }
+        }
+
+    def dump_ur_string(self):
+        return json.dumps(self.dump_ur_prep())

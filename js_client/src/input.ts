@@ -98,14 +98,15 @@ function inputHistoryNavigation(direction: targetDirection): boolean {
     return false;
 }
 
-function highlightSelectedCommandItem(id: number) {
+function highlightSelectedCommandItem(id: number): void {
     const selectedElement: HTMLElement = document.getElementById(`command-${id}`);
     if (selectedElement) {
         selectedElement.classList.add('command-highlighted');
+        selectedElement.scrollIntoView({behavior: "smooth", block: "nearest", inline: "nearest"});
     }
 }
 
-function clearHighlightedCommandItems() {
+function clearHighlightedCommandItems():void  {
     const highlightedElement: HTMLElement = document.querySelector('.command-highlighted');
     if (highlightedElement) {
         highlightedElement.classList.remove('command-highlighted');
