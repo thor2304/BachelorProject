@@ -1,8 +1,13 @@
 <?xml version="1.0"?>
 <rtde_config>
 	<recipe key="state">
-		<field name="safety_status_bits" type="UINT32"/>
+		<field name="safety_status" type="INT32"/>
 		<field name="runtime_state" type="UINT32"/>
+		<field name="robot_mode" type="INT32"/>
 		<field name="actual_q" type="VECTOR6D"/>
+		<field name="actual_TCP_pose" type="VECTOR6D"/>
+		<field name="actual_TCP_speed" type="VECTOR6D"/>
+		<field name="actual_TCP_force" type="VECTOR6D"/>
+		<field name="payload" type="DOUBLE"/>
 	</recipe>
 </rtde_config>
