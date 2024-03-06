@@ -7,6 +7,7 @@ interface Command {
     text: string;
     id: number;
 }
+
 const commandInputHistory: Command[] = [];
 let historyIndex: number = 0;
 
@@ -24,7 +25,7 @@ function createPTagWithText(text: string, id: number): void {
 
 function sendCommand(command: string): void {
     if (command === '') return;
-    const customEvent: CustomEvent<{ text: string, id: number}> = new CustomEvent('commandEntered', {
+    const customEvent: CustomEvent<{ text: string, id: number }> = new CustomEvent('commandEntered', {
         detail: {
             text: command,
             id: current_id++,
@@ -95,15 +96,24 @@ function inputHistoryNavigation(direction: targetDirection): boolean {
 
 function highlightSelectedCommandItem(id: number) {
     const selectedElement: HTMLElement = document.getElementById(`command-${id}`);
-    if(selectedElement) {
+    if (selectedElement) {
         selectedElement.classList.add('command-highlighted');
     }
 }
 
 function clearHighlightedCommandItems() {
     const highlightedElement: HTMLElement = document.querySelector('.command-highlighted');
-    if(highlightedElement) {
+    if (highlightedElement) {
         highlightedElement.classList.remove('command-highlighted');
+    }
+}
+
+function handleArrowPresses(textArea: HTMLTextAreaElement, e: KeyboardEvent, direction: targetDirection): void {
+    if (isCursorOnFirstOrLastLine(textArea, direction) || getTextFromInput() === '') {
+        e.preventDefault();
+        if (inputHistoryNavigation(direction)) {
+            highlightSelectedCommandItem(commandInputHistory[historyIndex].id);
+        }
     }
 }
 
@@ -116,20 +126,10 @@ inputField.addEventListener('keydown', function (e: KeyboardEvent): void {
             sendCommand(getTextFromInput());
             break;
         case 'ArrowUp':
-            if (isCursorOnFirstOrLastLine(this, targetDirection.up) || getTextFromInput() === '') {
-                e.preventDefault();
-                if (inputHistoryNavigation(targetDirection.up)) {
-                    highlightSelectedCommandItem(commandInputHistory[historyIndex].id);
-                }
-            }
+            handleArrowPresses(this, e, targetDirection.up);
             break;
         case 'ArrowDown':
-            if (isCursorOnFirstOrLastLine(this, targetDirection.down) || getTextFromInput() === '') {
-                e.preventDefault();
-                if (inputHistoryNavigation(targetDirection.down)) {
-                    highlightSelectedCommandItem(commandInputHistory[historyIndex].id);
-                }
-            }
+            handleArrowPresses(this, e, targetDirection.down);
             break;
     }
 })
