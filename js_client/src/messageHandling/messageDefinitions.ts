@@ -33,8 +33,16 @@ export type FeedbackMessageData = {
 }
 
 export type RobotStateMessageData = {
-    state: string,
+    safety_status: string,
+    runtime_state: string,
+    robot_mode: string,
     joints: [number, number, number, number, number, number],
+    tcp: {
+        pose: [number, number, number, number, number, number],
+        speed: [number, number, number, number, number, number],
+        force: [number, number, number, number, number, number]
+    },
+    payload: number
 }
 
 export type CommandMessage = {
