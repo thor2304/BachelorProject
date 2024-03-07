@@ -21,6 +21,13 @@ html, body {
     justify-content: space-between;
 }
 
+.column45 {
+    width: 45%;
+}
+.column55 {
+    width: 55%;
+}
+
 .commandArea {
     width: 40%;
     height: 95vh;
@@ -79,23 +86,23 @@ li.error-response::before {
     box-sizing: border-box;
 }
 
-.customVariableView {
+.variableView {
     height: 45vh;
     width: 100%;
     box-sizing: border-box;
+    padding: .8em;
 }
 
-.customVariableViewColum {
-    width: 48%;
+.variableViewColum {
+    width: 45%;
     box-sizing: border-box;
     overflow: auto;
 }
 
-.customVariableViewColum h2 {
+.variableViewColum h2 {
     font-size: 1.2em;
     font-weight: bold;
-    text-decoration: underline;
-    text-align: center;
+    border-bottom: 0.1em solid var(--text-on-background-color);
 }
 
 .command-highlighted {
