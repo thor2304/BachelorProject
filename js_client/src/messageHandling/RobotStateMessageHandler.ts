@@ -1,4 +1,4 @@
-import {Message, MessageType, RobotStateMessageData} from "./messageDefinitions";
+import {Message, MessageType} from "./messageDefinitions";
 
 export function handleRobotStateMessage(message: Message): void {
     if (message.type !== MessageType.RobotState) {
@@ -10,10 +10,10 @@ export function handleRobotStateMessage(message: Message): void {
 
 }
 
-function iterateMessageData(data: any) {
-    Object.entries(data).forEach(([key, value]) => {
+function iterateMessageData(data: any):void  {
+    Object.entries(data).forEach(([key, value]):void  => {
         if(typeof value === 'object' && !Array.isArray(value) && value !== null) {
-            const headline = document.createElement('h3');
+            const headline: HTMLHeadingElement = document.createElement('h3');
             headline.textContent = key;
             document.getElementById('stateVariables').appendChild(headline);
             iterateMessageData(value);
