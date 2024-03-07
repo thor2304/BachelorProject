@@ -6,6 +6,7 @@ export enum MessageType {
     AckResponse = 'Ack_response',
     Feedback = 'Feedback',
     RobotState = 'Robot_state',
+    CommandFinished = 'Command_finished'
 }
 
 export enum Status {
@@ -13,7 +14,7 @@ export enum Status {
     Error = 'Error'
 }
 
-export type Message = CommandMessage | AckResponseMessage | FeedbackMessage | RobotStateMessage
+export type Message = CommandMessage | AckResponseMessage | FeedbackMessage | RobotStateMessage | CommandFinishedMessage
 
 export type CommandMessageData = {
     id: number,
@@ -45,6 +46,21 @@ export type RobotStateMessageData = {
     payload: number
 }
 
+export type StringedVariableTypes = 'string' | 'number' | 'boolean' | 'number[]'
+export type VariableTypes = string | number | boolean | number[]
+
+export type CommandFinishedVariable = {
+    name: string,
+    type: StringedVariableTypes,
+    value: VariableTypes
+}
+
+export type CommandFinishedMessageData = {
+    id: number,
+    command: string,
+    variables: CommandFinishedVariable[]
+}
+
 export type CommandMessage = {
     type: MessageType.Command,
     data: CommandMessageData
@@ -63,4 +79,9 @@ export type FeedbackMessage = {
 export type RobotStateMessage = {
     type: MessageType.RobotState,
     data: RobotStateMessageData
+}
+
+export type CommandFinishedMessage = {
+    type: MessageType.CommandFinished,
+    data: CommandFinishedMessageData
 }
