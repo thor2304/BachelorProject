@@ -3,7 +3,7 @@ import {toHtml} from 'hast-util-to-html'
 
 import urscript from "./URScript_TextMate"
 
-export async function highlightCommand(command: string): Promise<ChildNode> {
+export async function highlightCommand(command: string, wrap_in_pre: boolean = true): Promise<ChildNode> {
     const starryNight = await createStarryNight(common)
     await starryNight.register([urscript])
 
@@ -12,7 +12,8 @@ export async function highlightCommand(command: string): Promise<ChildNode> {
 
     let htmlString = toHtml(tree)
     if (!(htmlString.toLowerCase().startsWith("<code>") || htmlString.toLowerCase().startsWith("<pre>"))){
-        htmlString = `<pre><code>${htmlString}</code></pre>`
+        htmlString = `<code>${htmlString}</code>`
+        htmlString = wrap_in_pre ? `<pre>${htmlString}</pre>` : htmlString
     }
 
     return htmlToElement(htmlString)

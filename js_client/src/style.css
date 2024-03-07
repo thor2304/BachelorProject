@@ -26,11 +26,26 @@ html, body {
     height: 95vh;
 }
 
+.commandArea > * {
+    margin-bottom: 1em;
+    margin-top: 0;
+}
+
+.commandArea > div:last-child {
+    margin-bottom: 0;
+}
+
 .commandHistory {
     width: 100%;
     height: 80vh;
     box-sizing: border-box;
     overflow: auto;
+}
+
+#syntax-display{
+    height: fit-content;
+    min-height: 5em;
+    padding: .25em .5em;
 }
 
 ul.response-list {

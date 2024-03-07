@@ -1,5 +1,5 @@
 import {highlightCommandIntoElement} from "./SyntaxHighlighting/hast-starry-night";
-const inputField: HTMLTextAreaElement = <HTMLTextAreaElement>document.getElementById("inputField")
+export const inputField: HTMLTextAreaElement = <HTMLTextAreaElement>document.getElementById("inputField")
 export const commandList: HTMLElement = document.getElementById("commandList");
 
 let current_id: number = 0;
@@ -12,7 +12,7 @@ interface Command {
 const commandInputHistory: Command[] = [];
 let historyIndex: number = 0;
 
-function getTextFromInput(): string {
+export function getTextFromInput(): string {
     return inputField.value.trim();
 }
 
