@@ -4,7 +4,7 @@ from time import sleep
 
 from websockets.server import serve
 from socket import socket as Socket
-from RtdeConnection import open_rtde_server, start_rtde_server
+from RtdeConnection import start_rtde_server
 from socket import gethostbyname, gethostname
 from SocketMessages import parse_command_message, AckResponse
 from RobotControl import send_command, get_interpreter_socket, send_wrapped_command, read_from_socket
