@@ -51,16 +51,9 @@ li.response::before{
     margin-right: .25em;
 }
 
-
-
 li.success-response::before {
     background-color: #2ac52a;
 }
-
-
-
-
-
 
 li.error-response::before {
     background-color: #c52a2a;
@@ -86,10 +79,23 @@ li.error-response::before {
     box-sizing: border-box;
 }
 
-.variableVisualization {
+.customVariableView {
     height: 45vh;
     width: 100%;
     box-sizing: border-box;
+}
+
+.customVariableViewColum {
+    width: 48%;
+    box-sizing: border-box;
+    overflow: auto;
+}
+
+.customVariableViewColum h2 {
+    font-size: 1.2em;
+    font-weight: bold;
+    text-decoration: underline;
+    text-align: center;
 }
 
 .command-highlighted {
