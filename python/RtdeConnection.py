@@ -25,12 +25,13 @@ import asyncio
 import sys
 import rtde.rtde as rtde
 import rtde.rtde_config as rtde_config
+from websockets.server import serve
 
 from SocketMessages import RobotState
 
 sys.path.append("..")
 
-from RobotControl import POLYSCOPE_IP
+from RobotControl import POLYSCOPE_IP, get_socket
 
 ROBOT_HOST = POLYSCOPE_IP
 ROBOT_PORT = 30004
@@ -39,39 +40,35 @@ config_filename = "rtde_configuration.xml"
 conf = rtde_config.ConfigFile(config_filename)
 state_names, state_types = conf.get_recipe("state")
 
+RTDE_WEBSOCKET_HOST = "0.0.0.0"
+RTDE_WEBSOCKET_PORT = 8001
 
 
-async def start_rtde_loop():
-    print("Connecting to robot")
-    con = rtde.RTDE(ROBOT_HOST, ROBOT_PORT)
-    con.connect()
-    if con.is_connected():
-        print("1. Robot successfully connected")
-    else:
-        print("1. Robot connection failed")
+async def start_rtde_server():
+    print("Starting RTDE Websocket")
+    async with serve(get_handler(), RTDE_WEBSOCKET_HOST, RTDE_WEBSOCKET_PORT):
+        await asyncio.Future()  # run forever
 
-    # get controller version
-    con.get_controller_version()
 
-    # setup recipes
-    con.send_output_setup(state_names, state_types)
+def get_handler() -> callable:
+    async def handler(websocket, path):
+        # Connecting to RTDE interface
+        con = rtde.RTDE(ROBOT_HOST, ROBOT_PORT)
+        con.connect()
+        # get controller version
+        con.get_controller_version()
+        # setup recipes
+        con.send_output_setup(state_names, state_types)
+        # start data synchronization
+        if not con.send_start():
+            sys.exit()
 
-    if con.is_connected():
-        print("2. Robot successfully connected")
-    else:
-        print("2. Robot connection failed")
+        while True:
+            state = con.receive()
+            robot_state = RobotState(state)
+            print(f"Sending Robot state to Frontend: {str(robot_state)}")
+            await websocket.send(str(robot_state))
+            await asyncio.sleep(1)
 
-    # start data synchronization
-    if not con.send_start():
-        sys.exit()
+    return handler
 
-    while True:
-        state = con.receive()
-        robot_state = RobotState(state)
-        print(f"Robot state: {str(robot_state)}")
-
-        await asyncio.sleep(1)
-
-    con.send_pause()
-
-    con.disconnect()
