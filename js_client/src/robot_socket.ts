@@ -30,6 +30,9 @@ function handleMessageFromProxyServer(message: Message) {
         case MessageType.RobotState:
             handleRobotStateMessage(message);
             break;
+        case MessageType.CommandFinished:
+            console.log('Command finished: ', message);
+            break;
         default:
             console.log('invalid message type: ', message);
     }

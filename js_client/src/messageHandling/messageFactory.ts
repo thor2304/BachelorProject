@@ -1,5 +1,5 @@
 import {
-    AckResponseMessage,
+    AckResponseMessage, CommandFinishedMessage,
     CommandMessage,
     FeedbackMessage,
     Message,
@@ -18,6 +18,8 @@ export function parseMessage(message: string): Message {
             return parseFeedbackMessage(parsed);
         case "Robot_state":
             return parseRobotStateMessage(parsed);
+        case "Command_finished":
+            return parseCommandFinishedMessage(parsed);
         default:
             throw new Error(`Invalid message type: ${parsed.type}`);
     }
@@ -84,8 +86,30 @@ function parseRobotStateMessage(message: any): RobotStateMessage {
     return {
         type: MessageType.RobotState,
         data: {
-            state: noneGuard(message.data.state),
-            joints: noneGuard(message.data.joints)
+            safety_status: noneGuard(message.data.safety_status),
+            runtime_state: noneGuard(message.data.runtime_state),
+            robot_mode: noneGuard(message.data.robot_mode),
+            joints: noneGuard(message.data.joints),
+            tcp: {
+                pose: noneGuard(message.data.tcp.pose),
+                speed: noneGuard(message.data.tcp.speed),
+                force: noneGuard(message.data.tcp.force)
+            },
+            payload: noneGuard(message.data.payload)
+        }
+    };
+}
+
+function parseCommandFinishedMessage(message: any): CommandFinishedMessage {
+    if (message.type !== "Command_finished") {
+        throw new Error(`Invalid message type: ${message.type}`);
+    }
+    return {
+        type: MessageType.CommandFinished,
+        data: {
+            id: noneGuard(message.data.id),
+            command: noneGuard(message.data.command),
+            variables: noneGuard(message.data.variables)
         }
     };
 }
