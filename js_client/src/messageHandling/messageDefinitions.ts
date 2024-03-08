@@ -33,18 +33,23 @@ export type FeedbackMessageData = {
     message: string
 }
 
+export type TCPInformation = {
+    pose: [number, number, number, number, number, number],
+    speed: [number, number, number, number, number, number],
+    force: [number, number, number, number, number, number]
+}
+
 export type RobotStateMessageData = {
     safety_status: string,
     runtime_state: string,
     robot_mode: string,
     joints: [number, number, number, number, number, number],
-    tcp: {
-        pose: [number, number, number, number, number, number],
-        speed: [number, number, number, number, number, number],
-        force: [number, number, number, number, number, number]
-    },
+    tcp: TCPInformation,
     payload: number
 }
+
+export type stateMessageTypes = string | number | [number, number, number, number, number, number] | TCPInformation
+
 
 export type StringedVariableTypes = 'string' | 'number' | 'boolean' | 'number[]'
 export type VariableTypes = string | number | boolean | number[]
