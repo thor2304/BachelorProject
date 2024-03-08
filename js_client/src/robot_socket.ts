@@ -30,6 +30,9 @@ function handleMessageFromProxyServer(message: Message) {
         case MessageType.RobotState:
             handleRobotStateMessage(message);
             break;
+        case MessageType.CommandFinished:
+            console.log('Command finished: ', message);
+            break;
         default:
             console.log('invalid message type: ', message);
     }
@@ -59,16 +62,19 @@ function send(socket: WebSocket, data: string, id: number) {
 
 async function testCommands() {
     const proxyServer = get_socket("localhost", 8767);
+    const rtdeServer = get_socket("localhost", 8001);
+
     proxyServer.onopen = () => {
         console.log('proxy server opened');
         document.addEventListener('commandEntered', function (e: CustomEvent) {
             send(proxyServer, e.detail.text, e.detail.id)
         })
     };
+
+    rtdeServer.onopen = () => {
+        console.log('RTDE socket opened');
+    };
 }
 
-
 testCommands().then();
-
-
 
