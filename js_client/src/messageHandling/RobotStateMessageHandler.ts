@@ -5,6 +5,7 @@ export function handleRobotStateMessage(message: Message): void {
         console.log('not a Robot_state message: ', message);
         return;
     }
+    console.log('Robot_state message: ', message);
 
     iterateMessageData(message.data);
 
