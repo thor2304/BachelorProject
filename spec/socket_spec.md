@@ -57,13 +57,21 @@ The server will respond with an `ack_response` message.
 ```
 
 ## Robot state
-Very rough, not thought through or implemented yet.
+Payload is measured in kg mass. 
 ```json
 {
   "type": "Robot_state",
   "data": {
-    "state": "running",
-    "joints": [0, 0, 0, 0, 0, 0]
+    "safety_status": "reduced_mode",
+    "runtime_state": "playing",
+    "robot_mode": "running",
+    "joints": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+    "tcp": {
+      "pose": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+      "speed": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+      "force": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+    },
+    "payload": 0.0
   }
 }
 ```

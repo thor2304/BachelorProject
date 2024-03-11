@@ -90,6 +90,10 @@ def prepare_interpreter_session(interpreter_socket: Socket):
     send_command("__test2__ = \"f\"", interpreter_socket)
 
 
+def get_rtde_socket():
+    return get_socket(POLYSCOPE_IP, 30004)
+
+
 def receive_input_commands(interpreter_socket: Socket):
     for i in range(30):
         # print(my_socket.recv(2048))
