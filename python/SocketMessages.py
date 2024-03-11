@@ -23,7 +23,7 @@ class Status(Enum):
         elif message.startswith("discard:"):
             return cls.Error
         else:
-            raise ValueError(f"Unknown status message: {message}")
+            raise ValueError(f"Unknown status message: '{message}'")
 
 
 class CommandMessageData:

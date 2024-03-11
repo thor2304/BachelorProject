@@ -3,6 +3,7 @@ import {Message, MessageType} from "./messageHandling/messageDefinitions";
 import {handleAckResponseMessage} from "./messageHandling/AckResponseHandler";
 import {handleFeedbackMessage} from "./messageHandling/FeedbackMessageHandler";
 import {handleRobotStateMessage} from "./messageHandling/RobotStateMessageHandler";
+import {EventList} from "./interaction/EventList";
 
 function get_socket(ip: string, port: number) {
     const out = new WebSocket(
@@ -34,7 +35,7 @@ function handleMessageFromProxyServer(message: Message) {
             console.log('Command finished: ', message);
             break;
         default:
-            console.log('invalid message type: ', message);
+            console.warn('invalid message type: ', message);
     }
 }
 
@@ -66,7 +67,7 @@ async function testCommands() {
 
     proxyServer.onopen = () => {
         console.log('proxy server opened');
-        document.addEventListener('commandEntered', function (e: CustomEvent) {
+        document.addEventListener(EventList.CommandEntered, function (e: CustomEvent) {
             send(proxyServer, e.detail.text, e.detail.id)
         })
     };

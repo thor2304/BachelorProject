@@ -1,4 +1,5 @@
 import {Message, MessageType} from "./messageDefinitions";
+import {emitCommandFinishedEvent} from "./MessageFinishedHandler";
 
 export function handleRobotStateMessage(message: Message): void {
     if (message.type !== MessageType.RobotState) {

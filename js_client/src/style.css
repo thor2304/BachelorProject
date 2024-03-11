@@ -72,11 +72,6 @@ li.success-response::before {
     background-color: #2ac52a;
 }
 
-
-
-
-
-
 li.error-response::before {
     background-color: #c52a2a;
 }
@@ -109,4 +104,10 @@ li.error-response::before {
 
 .command-highlighted {
     background-color: var(--group-A-active-color) !important;
+}
+
+#inputField.locked {
+    background-color: color-mix(in srgb, var(--slate-background-color), var(--locked-color) 20%);
+    border-color: var(--locked-color);
+    border-style: dashed;
 }

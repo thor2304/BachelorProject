@@ -1,4 +1,5 @@
-import {getTextFromInput, inputField} from '../input';
+import {getTextFromInput} from '../input';
+import {inputField} from '../interaction/InputField';
 import {highlightCommand, highlightCommandIntoElement} from "./hast-starry-night";
 
 const display: HTMLDivElement  = <HTMLDivElement>document.getElementById('syntax-display');
