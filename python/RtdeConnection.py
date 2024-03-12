@@ -50,6 +50,10 @@ async def start_rtde_server():
         await asyncio.Future()  # run forever
 
 
+def compare_robot_states(obj1, obj2):
+    return obj1.__dict__ == obj2.__dict__
+
+
 def get_handler() -> callable:
     async def handler(websocket, path):
         # Connecting to RTDE interface
@@ -63,12 +67,21 @@ def get_handler() -> callable:
         if not con.send_start():
             sys.exit()
 
+        # Set initial state
+        initial_state = con.receive()
+        old_robot_state = initial_state
+        await websocket.send(str(RobotState(initial_state)))
+
         while True:
+            # To not go too fast. I don't know if running the loop 500 times a second is good
+            await asyncio.sleep(1 / 60)  # 60hz
             state = con.receive()
+
+            if compare_robot_states(state, old_robot_state):
+                continue
+
+            old_robot_state = state
             robot_state = RobotState(state)
-            print(f"Sending Robot state to Frontend: {str(robot_state)}")
             await websocket.send(str(robot_state))
-            await asyncio.sleep(1)
 
     return handler
-
