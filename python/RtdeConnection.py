@@ -24,9 +24,7 @@
 import asyncio
 import sys
 
-import rtde
-import rtde.rtde as rtde
-import rtde.rtde_config as rtde_config
+from rtde import rtde_config, rtde
 from rtde.serialize import DataObject
 from websockets.server import serve
 
@@ -46,9 +44,9 @@ state_names, state_types = conf.get_recipe("state")
 RTDE_WEBSOCKET_HOST = "0.0.0.0"
 RTDE_WEBSOCKET_PORT = 8001
 
-
 TRANSMIT_FREQUENCY_IN_HERTZ = 60
 SLEEP_TIME = 1 / TRANSMIT_FREQUENCY_IN_HERTZ
+
 
 async def start_rtde_server():
     print("Starting RTDE Websocket")
