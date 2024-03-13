@@ -1,5 +1,5 @@
 import {Message, MessageType} from "./messageDefinitions";
-import {getChildWithTag} from "../Toolbox/DomTools";
+import {getChildWithClass} from "../Toolbox/DomTools";
 import {emitCommandFinishedEvent} from "./MessageFinishedHandler";
 
 const errorClass = "error-response"
@@ -11,29 +11,22 @@ export function handleAckResponseMessage(message: Message): void {
         return
     }
 
-    const liElement = document.getElementById(`command-${message.data.id}`);
-    if (!liElement) {
+    const commandWrapper: HTMLElement = document.getElementById(`command-${message.data.id}`);
+    if (!commandWrapper) {
         console.log(`no command with id: ${message.data.id}`, message);
         return
     }
+    const contentWrapper: HTMLElement = getChildWithClass(commandWrapper, 'contentWrapper');
+    const responseWrapper: HTMLElement = getChildWithClass(contentWrapper, 'responseWrapper');
 
-    let subList = getChildWithTag(liElement, 'ul');
-    if (!subList) {
-        subList = document.createElement('ul');
-        // move styling to css
-        subList.classList.add("response-list")
-    }
-    const subListItem = document.createElement('li');
+    const responseParagraph: HTMLParagraphElement = document.createElement('p');
+    responseParagraph.classList.add("response");
 
-    // Move styling to css
-    subListItem.classList.add("response");
     const classname = (message.data.status === 'Ok') ? successClass : errorClass
-    subListItem.classList.add(classname);
-    subListItem.textContent = message.data.message;
+    responseParagraph.classList.add(classname);
+    responseParagraph.textContent = message.data.message;
 
-    subList.appendChild(subListItem);
-
-    liElement.appendChild(subList);
+    responseWrapper.appendChild(responseParagraph);
 
     console.log(message);
     
