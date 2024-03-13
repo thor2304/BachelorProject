@@ -131,9 +131,9 @@ inputField.addEventListener('keydown', function (e: KeyboardEvent): void {
     clearHighlightedCommandItems();
     switch (e.key) {
         case 'Enter':
-            if (e.key === 'Enter' && e.shiftKey) return;
+            if (e.shiftKey) return;
             e.preventDefault();
-            if (inputFieldIsLocked()) {
+            if (inputFieldIsLocked() && !e.ctrlKey) {
                 indicateToUserThatFieldIsLocked()
                 break;
             }
