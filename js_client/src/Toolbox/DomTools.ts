@@ -11,13 +11,12 @@ export function getChildWithTag(node: HTMLElement, tagName: string): HTMLElement
 export function getChildWithClass(node: HTMLElement, className: string): HTMLElement | null {
     const children = node.children;
     for (let i = 0; i < children.length; i++) {
-        if (children[i].className === className) {
+        if (children[i].classList.contains(className)) {
             return children[i] as HTMLElement;
         }
     }
-    return null;
+    return document.createElement('div') as HTMLElement;
 }
-
 
 export function getCommandEntry(id: number): HTMLElement | null {
     return document.getElementById(`command-${id}`);
