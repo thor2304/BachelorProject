@@ -23,8 +23,11 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 import asyncio
 import sys
+
+import rtde
 import rtde.rtde as rtde
 import rtde.rtde_config as rtde_config
+from rtde.serialize import DataObject
 from websockets.server import serve
 
 from SocketMessages import RobotState
@@ -44,13 +47,16 @@ RTDE_WEBSOCKET_HOST = "0.0.0.0"
 RTDE_WEBSOCKET_PORT = 8001
 
 
+TRANSMIT_FREQUENCY_IN_HERTZ = 60
+SLEEP_TIME = 1 / TRANSMIT_FREQUENCY_IN_HERTZ
+
 async def start_rtde_server():
     print("Starting RTDE Websocket")
     async with serve(get_handler(), RTDE_WEBSOCKET_HOST, RTDE_WEBSOCKET_PORT):
         await asyncio.Future()  # run forever
 
 
-def compare_robot_states(obj1, obj2):
+def states_are_equal(obj1: DataObject, obj2: DataObject):
     return obj1.__dict__ == obj2.__dict__
 
 
@@ -73,11 +79,10 @@ def get_handler() -> callable:
         await websocket.send(str(RobotState(initial_state)))
 
         while True:
-            # To not go too fast. I don't know if running the loop 500 times a second is good
-            await asyncio.sleep(1 / 60)  # 60hz
+            await asyncio.sleep(SLEEP_TIME)
             state = con.receive()
 
-            if compare_robot_states(state, old_robot_state):
+            if states_are_equal(state, old_robot_state):
                 continue
 
             old_robot_state = state
