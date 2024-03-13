@@ -24,7 +24,15 @@ export function handleAckResponseMessage(message: Message): void {
 
     const classname = (message.data.status === 'Ok') ? successClass : errorClass
     responseParagraph.classList.add(classname);
-    responseParagraph.textContent = message.data.message;
+
+    let messageParts = message.data.message.split(':')
+    let statusType = messageParts.shift()
+    let newMessage = messageParts.join(':')
+
+    statusType = `<span>${statusType}:</span>`
+    newMessage = statusType + newMessage
+
+    responseParagraph.innerHTML = newMessage;
 
     responseWrapper.appendChild(responseParagraph);
 

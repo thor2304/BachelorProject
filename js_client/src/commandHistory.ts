@@ -13,25 +13,32 @@ function createCommandContainer(text: string, id: number): void {
     wrapperElement.classList.add('field', 'flex');
 
     const idWrapper: HTMLDivElement = document.createElement('div');
-    idWrapper.classList.add('idWrapper');
+    idWrapper.classList.add('idWrapper', 'column10', 'center');
+
     const contentWrapper: HTMLDivElement = document.createElement('div');
-    contentWrapper.classList.add('contentWrapper');
+    contentWrapper.classList.add('contentWrapper', 'column70');
 
     const buttonsWrapper: HTMLDivElement = document.createElement('div');
-    buttonsWrapper.classList.add('buttonsWrapper');
+    buttonsWrapper.classList.add('buttonsWrapper', 'column20', 'center');
+
     const commandWrapper: HTMLDivElement = document.createElement('div');
     commandWrapper.classList.add('commandWrapper');
+
     const responseWrapper: HTMLDivElement = document.createElement('div');
     responseWrapper.classList.add('responseWrapper');
 
     const idText: HTMLParagraphElement = document.createElement('p');
-    const reverseButton: HTMLButtonElement = document.createElement('button');
+    const undoButton: HTMLButtonElement = document.createElement('button');
+    undoButton.onclick = function (): void {
+        document.dispatchEvent(new CustomEvent(EventList.UndoEvent, {detail: {id: id}}));
+    }
+
 
     idText.textContent = id.toString();
-    reverseButton.textContent = 'Reverse';
+    undoButton.textContent = 'Undo';
 
     idWrapper.appendChild(idText);
-    buttonsWrapper.appendChild(reverseButton);
+    buttonsWrapper.appendChild(undoButton);
 
     contentWrapper.appendChild(commandWrapper);
     contentWrapper.appendChild(responseWrapper);
