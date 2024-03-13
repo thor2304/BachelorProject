@@ -30,8 +30,6 @@ from websockets.server import serve
 from SocketMessages import RobotState
 from RobotControl import POLYSCOPE_IP
 
-sys.path.append("..")
-
 ROBOT_HOST = POLYSCOPE_IP
 ROBOT_PORT = 30004
 config_filename = "rtde_configuration.xml"
