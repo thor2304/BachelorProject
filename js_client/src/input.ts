@@ -1,9 +1,7 @@
-import {highlightCommandIntoElement} from "./SyntaxHighlighting/hast-starry-night";
 import {EventList} from "./interaction/EventList";
 import {inputField} from "./interaction/InputField";
 import {indicateToUserThatFieldIsLocked, inputFieldIsLocked} from "./interaction/lock_input_field";
-
-export const commandList: HTMLElement = document.getElementById("commandList");
+import {clearHighlightedCommandItems, highlightSelectedCommandItem} from "./commandHistory";
 
 let current_id: number = 0;
 
@@ -19,18 +17,6 @@ export function getTextFromInput(): string {
     return inputField.value.trim();
 }
 
-function createPTagWithText(text: string, id: number): void {
-    const liElement: HTMLLIElement = document.createElement('li');
-    liElement.id = `command-${id}`;
-    liElement.classList.add('field');
-    const container = document.createElement('div');
-    liElement.appendChild(container);
-
-    highlightCommandIntoElement(text, container);
-
-    commandList.appendChild(liElement).scrollIntoView({behavior: "smooth"})
-}
-
 function sendCommand(command: string): void {
     if (command === '') return;
     const customEvent: CustomEvent<{ text: string, id: number }> = new CustomEvent(EventList.CommandEntered, {
@@ -40,11 +26,11 @@ function sendCommand(command: string): void {
         },
     });
     inputField.value = '';
-    saveCommandToHistory(command, customEvent.detail.id);
+    saveCommandToInputHistory(command, customEvent.detail.id);
     document.dispatchEvent(customEvent);
 }
 
-function saveCommandToHistory(command: string, commandId: number): void {
+function saveCommandToInputHistory(command: string, commandId: number): void {
     if (command != '') {
         const existingIndex: number = commandInputHistory.findIndex((item: Command): boolean => item.text === command);
 
@@ -102,21 +88,6 @@ function inputHistoryNavigation(direction: targetDirection): boolean {
     return false;
 }
 
-function highlightSelectedCommandItem(id: number): void {
-    const selectedElement: HTMLElement = document.getElementById(`command-${id}`);
-    if (selectedElement) {
-        selectedElement.classList.add('command-highlighted');
-        selectedElement.scrollIntoView({behavior: "smooth", block: "nearest", inline: "nearest"});
-    }
-}
-
-function clearHighlightedCommandItems():void  {
-    const highlightedElement: HTMLElement = document.querySelector('.command-highlighted');
-    if (highlightedElement) {
-        highlightedElement.classList.remove('command-highlighted');
-    }
-}
-
 function handleArrowPresses(textArea: HTMLTextAreaElement, e: KeyboardEvent, direction: targetDirection): void {
     if (isCursorOnFirstOrLastLine(textArea, direction) || getTextFromInput() === '') {
         e.preventDefault();
@@ -147,7 +118,3 @@ inputField.addEventListener('keydown', function (e: KeyboardEvent): void {
             break;
     }
 })
-
-document.addEventListener(EventList.CommandEntered, function (e: CustomEvent): void {
-    createPTagWithText(e.detail.text, e.detail.id);
-});
