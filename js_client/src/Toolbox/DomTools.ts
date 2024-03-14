@@ -15,7 +15,7 @@ export function getChildWithClass(node: HTMLElement, className: string): HTMLEle
             return children[i] as HTMLElement;
         }
     }
-    return document.createElement('div') as HTMLElement;
+    return null;
 }
 
 export function getCommandEntry(id: number): HTMLElement | null {
