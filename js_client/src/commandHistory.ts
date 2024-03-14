@@ -36,7 +36,7 @@ function createCommandContainer(text: string, id: number): void {
 
 
     idText.textContent = id.toString();
-    undoButton.textContent = 'Undo';
+    undoButton.textContent = 'Undo up to here';
 
     idWrapper.appendChild(idText);
     buttonsWrapper.appendChild(undoButton);

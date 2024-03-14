@@ -59,6 +59,9 @@
     --border-color-light: hsl(210, 9%, 77%);
     --border-color-dark: hsl(240, 20%, 2%);
 
+    --undone-color-light: hsl(0, 1%, 60%);
+    --undone-color-dark: hsl(0, 0%, 29%);
+
     /**
     Setting al of the variables to their dark values
      */
@@ -80,6 +83,7 @@
     --group-B-inactive-color: var(--group-B-inactive-color-dark);
     --text-on-background-color: var(--text-on-background-color-dark);
     --border-color: var(--border-color-dark);
+    --undone-color: var(--undone-color-dark);
 }
 
 @media(prefers-color-scheme: light){
@@ -101,5 +105,6 @@
         --group-B-inactive-color: var(--group-B-inactive-color-light);
         --text-on-background-color: var(--text-on-background-color-light);
         --border-color: var(--border-color-light);
+        --undone-color: var(--undone-color-light);
     }
 }

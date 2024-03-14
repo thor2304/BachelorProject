@@ -121,3 +121,7 @@ p {
     border-color: var(--locked-color);
     border-style: dashed;
 }
+
+.field.undone {
+    background-color: var(--undone-color);
+}
