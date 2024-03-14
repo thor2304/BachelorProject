@@ -1,4 +1,5 @@
 import {Message, MessageType, RobotStateMessageData, stateMessageTypes, TCPInformation} from "./messageDefinitions";
+import {generateVariableSelection, getListOfCheckedVariables} from "../cobotVariableSelection";
 
 export function handleRobotStateMessage(message: Message): void {
     if (message.type !== MessageType.RobotState) {
@@ -6,6 +7,7 @@ export function handleRobotStateMessage(message: Message): void {
         return;
     }
     iterateMessageData(message.data);
+    generateVariableSelection(message.data);
 }
 
 function iterateMessageData(data: RobotStateMessageData): void {
@@ -14,17 +16,21 @@ function iterateMessageData(data: RobotStateMessageData): void {
     const stateVariableView: HTMLElement = document.createElement('div');
     stateVariableView.id = id;
 
+    const listOfSelectionNodes: NodeListOf<HTMLInputElement> = document.querySelectorAll('.stateVariableSelectionWrapper input');
+
     Object.entries(data).forEach(([key, value]): void => {
-        if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
-//            const headline: HTMLElement = document.createElement('h3');
-//            headline.textContent = key;
-//            stateVariableView.appendChild(headline);
-            Object.entries(value).forEach(([innerKey, innerValue]): void => {
-                generateHtmlFromMessageData(innerKey, stateVariableView, innerValue);
-            });
-            return;
+        if(getListOfCheckedVariables(listOfSelectionNodes).includes(key)){
+            if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+    //            const headline: HTMLElement = document.createElement('h3');
+    //            headline.textContent = key;
+    //            stateVariableView.appendChild(headline);
+                Object.entries(value).forEach(([innerKey, innerValue]): void => {
+                    generateHtmlFromMessageData(innerKey, stateVariableView, innerValue);
+                });
+                return;
+            }
+            generateHtmlFromMessageData(key, stateVariableView, value);
         }
-        generateHtmlFromMessageData(key, stateVariableView, value);
     });
 
     if (oldStateVariableView) {

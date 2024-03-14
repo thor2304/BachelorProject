@@ -31,6 +31,10 @@ html, body {
     max-width: 55%;
 }
 
+.hidden {
+    display: none;
+}
+
 .commandArea {
     width: 40%;
     height: 95vh;
@@ -109,4 +113,16 @@ li.error-response::before {
 
 .command-highlighted {
     background-color: var(--group-A-active-color) !important;
+}
+
+#stateVariablePopup {
+    width: 100%;
+    cursor: pointer;
+    z-index: 1000; /* high z-index */
+    background: #000; /* fallback */
+    background: rgba(0,0,0,0.5);
+}
+.stateVariableSelectionWrapper label {
+    margin-left: .3em;
+    margin-bottom: .5em;
 }
