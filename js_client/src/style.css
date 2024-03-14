@@ -40,11 +40,26 @@ html, body {
     height: 95vh;
 }
 
+.commandArea > * {
+    margin-bottom: 1em;
+    margin-top: 0;
+}
+
+.commandArea > div:last-child {
+    margin-bottom: 0;
+}
+
 .commandHistory {
     width: 100%;
     height: 80vh;
     box-sizing: border-box;
     overflow: auto;
+}
+
+#syntax-display{
+    height: fit-content;
+    min-height: 5em;
+    padding: .25em .5em;
 }
 
 ul.response-list {
@@ -113,6 +128,12 @@ li.error-response::before {
 
 .command-highlighted {
     background-color: var(--group-A-active-color) !important;
+}
+
+#inputField.locked {
+    background-color: color-mix(in srgb, var(--slate-background-color), var(--locked-color) 20%);
+    border-color: var(--locked-color);
+    border-style: dashed;
 }
 
 #stateVariablePopup {

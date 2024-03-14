@@ -1,5 +1,6 @@
 import {Message, MessageType} from "./messageDefinitions";
 import {getChildWithTag} from "../Toolbox/DomTools";
+import {emitCommandFinishedEvent} from "./MessageFinishedHandler";
 
 const errorClass = "error-response"
 const successClass = "success-response"
@@ -35,4 +36,6 @@ export function handleAckResponseMessage(message: Message): void {
     liElement.appendChild(subList);
 
     console.log(message);
+    
+    emitCommandFinishedEvent(message) // For testing purposes. Must be removed later!!
 }

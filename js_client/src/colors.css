@@ -1,5 +1,5 @@
 :root{
-    --unlocked-color: rgba(231, 231, 231, 0.6);
+    --locked-color: rgba(231, 231, 231, 0.6);
 
     /**
     The color map for js is defined below

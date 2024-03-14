@@ -8,6 +8,7 @@ export function getChildWithTag(node: HTMLElement, tagName: string): HTMLElement
     return null;
 }
 
-function getCommandEntry(id: number): HTMLElement | null {
+
+export function getCommandEntry(id: number): HTMLElement | null {
     return document.getElementById(`command-${id}`);
 }

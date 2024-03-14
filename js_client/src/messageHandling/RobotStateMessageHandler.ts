@@ -1,5 +1,6 @@
 import {Message, MessageType, RobotStateMessageData, stateMessageTypes, TCPInformation} from "./messageDefinitions";
 import {generateVariableSelection, getListOfCheckedVariables} from "../cobotVariableSelection";
+import {emitCommandFinishedEvent} from "./MessageFinishedHandler";
 
 export function handleRobotStateMessage(message: Message): void {
     if (message.type !== MessageType.RobotState) {
