@@ -1,5 +1,6 @@
 import {EventList} from "./interaction/EventList";
 import {highlightCommandIntoElement} from "./SyntaxHighlighting/hast-starry-night";
+import {getCommandEntry} from "./Toolbox/DomTools";
 
 document.addEventListener(EventList.CommandEntered, function (e: CustomEvent): void {
     createCommandContainer(e.detail.text, e.detail.id);
@@ -53,7 +54,7 @@ function createCommandContainer(text: string, id: number): void {
 }
 
 export function highlightSelectedCommandItem(id: number): void {
-    const selectedElement: HTMLElement = document.getElementById(`command-${id}`);
+    const selectedElement: HTMLElement = getCommandEntry(id);
     if (selectedElement) {
         selectedElement.classList.add('command-highlighted');
         selectedElement.scrollIntoView({behavior: "smooth", block: "nearest", inline: "nearest"});

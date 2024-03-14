@@ -1,5 +1,5 @@
 import {Message, MessageType} from "./messageDefinitions";
-import {getChildWithClass} from "../Toolbox/DomTools";
+import {getChildWithClass, getCommandEntry} from "../Toolbox/DomTools";
 import {emitCommandFinishedEvent} from "./MessageFinishedHandler";
 
 const errorClass = "error-response"
@@ -11,7 +11,7 @@ export function handleAckResponseMessage(message: Message): void {
         return
     }
 
-    const commandWrapper: HTMLElement = document.getElementById(`command-${message.data.id}`);
+    const commandWrapper: HTMLElement = getCommandEntry(message.data.id);
     if (!commandWrapper) {
         console.log(`no command with id: ${message.data.id}`, message);
         return
