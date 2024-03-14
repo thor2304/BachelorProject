@@ -7,6 +7,7 @@ from rtde.serialize import DataObject
 
 class MessageType(Enum):
     Command = auto()
+    Undo = auto()
     Ack_response = auto()
     Feedback = auto()
     Robot_state = auto()
@@ -32,6 +33,11 @@ class CommandMessageData:
         self.command = command
 
 
+class UndoMessageData:
+    def __init__(self, id: int):
+        self.id = id
+
+
 class AckResponseData:
     def __init__(self, id: int, status: Status, command: str, message: str):
         self.id = id
@@ -51,6 +57,19 @@ class CommandMessage:
         self.type = MessageType.Command
         self.data: CommandMessageData = CommandMessageData(id, command)
 
+
+class UndoMessage:
+    def __init__(self, id: int):
+        self.type = MessageType.Undo
+        self.data: UndoMessageData = UndoMessageData(id)
+
+    def __str__(self):
+        return json.dumps({
+            "type": self.type.name,
+            "data": {
+                "id": self.data.id
+            }
+        })
 
 class AckResponse:
     def __init__(self, id: int, command: str, message: str):
@@ -391,3 +410,10 @@ def parse_command_message(message: str) -> CommandMessage:
     if parsed["type"] != MessageType.Command.name:
         raise ValueError(f"Message type: {parsed['type']} is not of type Command {MessageType.Command.name}")
     return CommandMessage(parsed["data"]["id"], parsed["data"]["command"])
+
+
+def parse_undo_message(message: str) -> UndoMessage:
+    parsed = json.loads(message)
+    if parsed["type"] != MessageType.Undo.name:
+        raise ValueError(f"Message type: {parsed['type']} is not of type Undo {MessageType.Undo.name}")
+    return UndoMessage(parsed["data"]["id"])

@@ -6,7 +6,8 @@ export enum MessageType {
     AckResponse = 'Ack_response',
     Feedback = 'Feedback',
     RobotState = 'Robot_state',
-    CommandFinished = 'Command_finished'
+    CommandFinished = 'Command_finished',
+    Undo = 'Undo'
 }
 
 export enum Status {
@@ -14,11 +15,15 @@ export enum Status {
     Error = 'Error'
 }
 
-export type Message = CommandMessage | AckResponseMessage | FeedbackMessage | RobotStateMessage | CommandFinishedMessage
+export type Message = CommandMessage | UndoMessage | AckResponseMessage | FeedbackMessage | RobotStateMessage | CommandFinishedMessage
 
 export type CommandMessageData = {
     id: number,
     command: string,
+}
+
+export type UndoMessageData = {
+    id: number
 }
 
 export type AckResponseMessageData = {
@@ -64,6 +69,11 @@ export type CommandFinishedMessageData = {
 export type CommandMessage = {
     type: MessageType.Command,
     data: CommandMessageData
+}
+
+export type UndoMessage = {
+    type: MessageType.Undo,
+    data: UndoMessageData
 }
 
 export type AckResponseMessage = {

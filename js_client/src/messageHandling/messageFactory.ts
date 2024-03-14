@@ -5,7 +5,7 @@ import {
     Message,
     MessageType,
     RobotStateMessage,
-    Status
+    Status, UndoMessage
 } from "./messageDefinitions";
 
 export function parseMessage(message: string): Message {
@@ -38,6 +38,15 @@ export function createCommandMessage(id: number, command: string): CommandMessag
         data: {
             id: id,
             command: command,
+        }
+    };
+}
+
+export function createUndoMessage(id: number): UndoMessage {
+    return {
+        type: MessageType.Undo,
+        data: {
+            id: id
         }
     };
 }
