@@ -1,4 +1,4 @@
-import {createCommandMessage, parseMessage} from "./messageHandling/messageFactory";
+import {createCommandMessage, createUndoMessage, parseMessage} from "./messageHandling/messageFactory";
 import {Message, MessageType} from "./messageHandling/messageDefinitions";
 import {handleAckResponseMessage} from "./messageHandling/AckResponseHandler";
 import {handleFeedbackMessage} from "./messageHandling/FeedbackMessageHandler";
@@ -42,23 +42,16 @@ function handleMessageFromProxyServer(message: Message) {
 /**
  *
  * @param socket {WebSocket}
- * @param data {string}
- * @param id {number}
+ * @param message {Message}
  */
-function send(socket: WebSocket, data: string, id: number) {
+function send(socket: WebSocket, message: Message) {
     if (socket.readyState === WebSocket.CLOSED) {
         console.log('socket closed');
         return;
     }
-    if (!data.endsWith('\n')) {
-        data += '\n';
-    }
 
-    const commandMessage = createCommandMessage(id, data);
-
-    console.log('sending command: ' + JSON.stringify(commandMessage));
-
-    socket.send(JSON.stringify(commandMessage));
+    console.log('sending command: ' + JSON.stringify(message));
+    socket.send(JSON.stringify(message));
 }
 
 async function testCommands() {
@@ -68,8 +61,13 @@ async function testCommands() {
     proxyServer.onopen = () => {
         console.log('proxy server opened');
         document.addEventListener(EventList.CommandEntered, function (e: CustomEvent) {
-            send(proxyServer, e.detail.text, e.detail.id)
-        })
+            const commandMessage = createCommandMessage(e.detail.id, e.detail.text);
+            send(proxyServer, commandMessage)
+        });
+        document.addEventListener(EventList.UndoEvent, function (e: CustomEvent) {
+            const undoCommand = createUndoMessage(e.detail.id);
+            send(proxyServer, undoCommand);
+        });
     };
 
     rtdeServer.onopen = () => {
