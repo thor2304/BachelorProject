@@ -23,15 +23,12 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 import asyncio
 import sys
-import rtde.rtde as rtde
-import rtde.rtde_config as rtde_config
+
+from rtde import rtde_config, rtde
+from rtde.serialize import DataObject
 from websockets.server import serve
-
 from SocketMessages import RobotState
-
-sys.path.append("..")
-
-from RobotControl import POLYSCOPE_IP, get_socket
+from RobotControl import POLYSCOPE_IP
 
 ROBOT_HOST = POLYSCOPE_IP
 ROBOT_PORT = 30004
@@ -43,11 +40,18 @@ state_names, state_types = conf.get_recipe("state")
 RTDE_WEBSOCKET_HOST = "0.0.0.0"
 RTDE_WEBSOCKET_PORT = 8001
 
+TRANSMIT_FREQUENCY_IN_HERTZ = 60
+SLEEP_TIME = 1 / TRANSMIT_FREQUENCY_IN_HERTZ
+
 
 async def start_rtde_server():
     print("Starting RTDE Websocket")
     async with serve(get_handler(), RTDE_WEBSOCKET_HOST, RTDE_WEBSOCKET_PORT):
         await asyncio.Future()  # run forever
+
+
+def states_are_equal(obj1: DataObject, obj2: DataObject):
+    return obj1.__dict__ == obj2.__dict__
 
 
 def get_handler() -> callable:
@@ -63,12 +67,20 @@ def get_handler() -> callable:
         if not con.send_start():
             sys.exit()
 
+        # Set initial state
+        initial_state = con.receive()
+        old_robot_state = initial_state
+        await websocket.send(str(RobotState(initial_state)))
+
         while True:
+            await asyncio.sleep(SLEEP_TIME)
             state = con.receive()
+
+            if states_are_equal(state, old_robot_state):
+                continue
+
+            old_robot_state = state
             robot_state = RobotState(state)
-            print(f"Sending Robot state to Frontend: {str(robot_state)}")
             await websocket.send(str(robot_state))
-            await asyncio.sleep(1)
 
     return handler
-
