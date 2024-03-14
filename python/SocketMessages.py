@@ -417,3 +417,13 @@ def parse_undo_message(message: str) -> UndoMessage:
     if parsed["type"] != MessageType.Undo.name:
         raise ValueError(f"Message type: {parsed['type']} is not of type Undo {MessageType.Undo.name}")
     return UndoMessage(parsed["data"]["id"])
+
+
+def parse_message(message: str) -> CommandMessage | UndoMessage:
+    parsed = json.loads(message)
+    if parsed["type"] == MessageType.Command.name:
+        return parse_command_message(message)
+    elif parsed["type"] == MessageType.Undo.name:
+        return parse_undo_message(message)
+    else:
+        raise ValueError(f"Unknown message type: {parsed['type']}")
