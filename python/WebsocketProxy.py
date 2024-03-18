@@ -4,7 +4,6 @@ from time import sleep
 
 from websockets.server import serve
 from socket import socket as Socket
-from RtdeConnection import start_rtde_server
 from socket import gethostbyname, gethostname
 from SocketMessages import AckResponse, parse_message, CommandMessage, UndoMessage, UndoResponseMessage, \
     UndoStatus
@@ -32,6 +31,7 @@ def handle_undo_message(message: UndoMessage) -> str:
     return str(response)
 
 
+
 def get_handler(socket: Socket) -> callable:
     async def echo(websocket):
         async for message in websocket:
@@ -52,15 +52,6 @@ def get_handler(socket: Socket) -> callable:
             await websocket.send(str_response)
 
     return echo
-
-
-async def main():
-    print("Starting WebsocketProxy.py")
-    async with asyncio.TaskGroup() as tg:
-        t1 = tg.create_task(open_robot_server())
-        t2 = tg.create_task(start_webserver())
-        t3 = tg.create_task(start_rtde_server())
-    pass
 
 
 async def open_robot_server():
@@ -146,6 +137,3 @@ async def start_webserver():
     async with serve(get_handler(interpreter_socket), "0.0.0.0", 8767):
         await asyncio.Future()  # run forever
 
-
-if __name__ == '__main__':
-    asyncio.run(main())

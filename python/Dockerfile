@@ -11,4 +11,4 @@ COPY rtde-2.7.2-release.zip /app
 
 RUN pip install rtde-2.7.2-release.zip
 
-CMD ["python", "WebsocketProxy.py"]
+CMD ["python", "main.py"]
