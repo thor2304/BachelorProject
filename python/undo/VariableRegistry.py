@@ -1,3 +1,4 @@
+from RobotSocketMessages import VariableObject
 from undo.StateVariable import CodeStateVariable, RtdeStateVariable
 
 
@@ -13,13 +14,14 @@ class VariableRegistry:
         self._rtde_variables.append(variable)
         # and some handling of how to enable rtde listening for this variable
 
-    def generate_read_commands(self) -> list[str]:
+    def generate_read_commands(self) -> list[VariableObject]:
         output_list = []
         for variable in self._code_variables:
             if variable.is_code:
-                output = variable.command_for_reading
-                output += "\n"
-                output_list.append(output)
+                output_list.append(variable.socket_representation)
             else:
                 raise ValueError("Variable in code list is not a code variable")
         return output_list
+
+    def get_code_variables(self) -> list[CodeStateVariable]:
+        return self._code_variables

@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 
+from RobotSocketMessages import VariableObject, VariableTypes
 from undo.VariableAssignmentCommandBuilder import VariableAssignmentCommandBuilder
 
 
@@ -30,3 +31,5 @@ class CodeStateVariable(StateVariable):
         self.is_code = True
         self.command_for_reading = command_for_reading
         "This must be the urscript code that is necessary to return a value for this variable."
+        # TODO: Correct typing on the variableTypes.string
+        self.socket_representation = VariableObject(name, VariableTypes.String, command_for_reading)

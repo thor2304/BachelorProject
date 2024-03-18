@@ -4,6 +4,7 @@ from enum import Enum, auto
 
 class RobotSocketMessageTypes(Enum):
     Command_finished = auto()
+    Report_state = auto()
 
 
 class VariableTypes(Enum):
@@ -74,3 +75,21 @@ class CommandFinished:
 
     def dump_ur_string(self):
         return json.dumps(self.dump(True))
+
+
+class ReportState:
+    def __init__(self, variables: list[VariableObject]):
+        self.type = RobotSocketMessageTypes.Report_state
+        self.variables: list[VariableObject] = variables
+
+    def __str__(self):
+        return json.dumps(self.dump())
+
+    def dump(self):
+        return {
+            "type": self.type.name,
+            "data": [variable.dump(True) for variable in self.variables]
+        }
+
+    def dump_ur_string(self):
+        return json.dumps(self.dump())

@@ -4,7 +4,14 @@ from SocketMessages import CommandMessage
 from undo.CommandStates import CommandStates
 
 
-class History:
+class History(object):
+    _instance: Self | None = None
+
+    def __new__(cls):
+        if not hasattr(cls, '_instance'):
+            cls._instance = super(History, cls).__new__(cls)
+        return cls._instance
+
     def __init__(self):
         self.command_state_history: dict[int, CommandStates] = {}
 
@@ -26,10 +33,4 @@ class History:
     @classmethod
     def get_history(cls) -> Self:
         """Returns a singleton history instance"""
-        return _shared_history
-
-
-_shared_history: History = History()
-
-
-
+        return cls._instance
