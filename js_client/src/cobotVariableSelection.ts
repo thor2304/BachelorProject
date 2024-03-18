@@ -18,6 +18,7 @@ export function generateVariableSelection(data: RobotStateMessageData): void {
         label.textContent = key;
         input.id = key;
         input.checked = true;
+        input.disabled = false;
         input.addEventListener('change', checkboxChanged);
         fragment.appendChild(clone);
     });
