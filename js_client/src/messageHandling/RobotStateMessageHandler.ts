@@ -6,9 +6,10 @@ import {
     stateMessageTypes,
     TCPInformation
 } from "./messageDefinitions";
-import {generateVariableSelection, getListOfCheckedVariables} from "../cobotVariableSelection";
+import {generateVariableSelection, listOfVariablesToDisplay} from "../cobotVariableSelection";
 
-export let savedRobotStateMessage: RobotStateMessage;
+
+let lastRobotStateMessage: RobotStateMessage;
 
 export function handleRobotStateMessage(message: Message): void {
     if (message.type !== MessageType.RobotState) {
@@ -16,10 +17,16 @@ export function handleRobotStateMessage(message: Message): void {
         return;
     }
 
-    savedRobotStateMessage = message;
+    lastRobotStateMessage = message;
 
-    generateVariableSelection(message.data);
+    generateVariableSelection(message.data, replayRobotStateMessage);
     iterateMessageData(message.data);
+}
+
+function replayRobotStateMessage(): void {
+    if (lastRobotStateMessage) {
+        handleRobotStateMessage(lastRobotStateMessage);
+    }
 }
 
 export function iterateMessageData(data: RobotStateMessageData): void {
@@ -28,11 +35,9 @@ export function iterateMessageData(data: RobotStateMessageData): void {
     const stateVariableView: HTMLElement = document.createElement('div');
     stateVariableView.id = id;
 
-    const selectionList: HTMLUListElement = document.getElementById('stateVariableSelection') as HTMLUListElement;
-    const checkboxes: NodeListOf<HTMLInputElement> = selectionList.querySelectorAll('.dropdown-item input[type="checkbox"]');
-
     Object.entries(data).forEach(([key, value]): void => {
-        if(getListOfCheckedVariables(checkboxes).includes(key)){
+        console.log(listOfVariablesToDisplay())
+        if(listOfVariablesToDisplay().includes(key)){
             if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
                 Object.entries(value).forEach(([innerKey, innerValue]): void => {
                     generateHtmlFromMessageData(innerKey, stateVariableView, innerValue);

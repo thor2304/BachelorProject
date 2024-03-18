@@ -1,14 +1,22 @@
 import {RobotStateMessageData} from "./messageHandling/messageDefinitions";
-import {iterateMessageData, savedRobotStateMessage} from "./messageHandling/RobotStateMessageHandler";
 
 const listId: 'stateVariableSelection' = "stateVariableSelection";
 const stateVariableSelectionList: HTMLElement = document.getElementById(listId);
 
-export function generateVariableSelection(data: RobotStateMessageData): void {
+export function generateVariableSelection(data: RobotStateMessageData, callback: () => void): void {
+    if (isVariableSelectionGenerated()) {
+        return;
+    }
+
     const fragment: DocumentFragment = document.createDocumentFragment();
 
     const startLiElement: HTMLLIElement = stateVariableSelectionList.firstElementChild as HTMLLIElement;
     const clonedLiElement: HTMLLIElement = startLiElement.cloneNode(true) as HTMLLIElement;
+
+    const handleChange = () => {
+        callback();
+        console.log("handleChange")
+    };
 
     Object.entries(data).forEach(([key]): void => {
         const clone: HTMLLIElement = clonedLiElement.cloneNode(true) as HTMLLIElement;
@@ -19,17 +27,14 @@ export function generateVariableSelection(data: RobotStateMessageData): void {
         input.id = key;
         input.checked = true;
         input.disabled = false;
-        input.addEventListener('change', checkboxChanged);
+        input.addEventListener('change', handleChange);
         fragment.appendChild(clone);
     });
 
-    if(!isVariableSelectionGenerated()){
-        stateVariableSelectionList.replaceChildren(fragment);
-        return;
-    }
+    stateVariableSelectionList.replaceChildren(fragment);
 }
 
-export function getListOfCheckedVariables(listOfNode: NodeListOf<HTMLInputElement>): string[] {
+function getListOfCheckedVariables(listOfNode: NodeListOf<HTMLInputElement>): string[] {
     const checkedVariables: string[] = [];
     listOfNode.forEach((checkbox: HTMLInputElement): void => {
         if (checkbox.checked) {
@@ -39,10 +44,12 @@ export function getListOfCheckedVariables(listOfNode: NodeListOf<HTMLInputElemen
     return checkedVariables;
 }
 
-function isVariableSelectionGenerated(): boolean {
-    return !stateVariableSelectionList.firstElementChild.isSameNode(stateVariableSelectionList.lastElementChild);
+export function listOfVariablesToDisplay(): string[] {
+    const checkboxes: NodeListOf<HTMLInputElement> = stateVariableSelectionList.querySelectorAll('.dropdown-item input[type="checkbox"]');
+    return getListOfCheckedVariables(checkboxes);
+
 }
 
-function checkboxChanged(): void {
-    iterateMessageData(savedRobotStateMessage.data);
+function isVariableSelectionGenerated(): boolean {
+    return !stateVariableSelectionList.firstElementChild.isSameNode(stateVariableSelectionList.lastElementChild);
 }
