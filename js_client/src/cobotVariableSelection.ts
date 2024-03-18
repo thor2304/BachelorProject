@@ -15,7 +15,6 @@ export function generateVariableSelection(data: RobotStateMessageData, callback:
 
     const handleChange = () => {
         callback();
-        console.log("handleChange")
     };
 
     Object.entries(data).forEach(([key]): void => {

@@ -36,7 +36,6 @@ export function iterateMessageData(data: RobotStateMessageData): void {
     stateVariableView.id = id;
 
     Object.entries(data).forEach(([key, value]): void => {
-        console.log(listOfVariablesToDisplay())
         if(listOfVariablesToDisplay().includes(key)){
             if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
                 Object.entries(value).forEach(([innerKey, innerValue]): void => {
