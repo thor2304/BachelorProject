@@ -11,6 +11,7 @@ class MessageType(Enum):
     Ack_response = auto()
     Feedback = auto()
     Robot_state = auto()
+    Undo_response = auto()
 
 
 class Status(Enum):
@@ -27,6 +28,13 @@ class Status(Enum):
             raise ValueError(f"Unknown status message: '{message}'")
 
 
+class UndoStatus(Enum):
+    Success = auto()
+    Error = auto()
+    CommandDidNotExist = auto()
+    CommandAlreadyUndone = auto()
+
+
 class CommandMessageData:
     def __init__(self, id: int, command: str):
         self.id = id
@@ -36,6 +44,12 @@ class CommandMessageData:
 class UndoMessageData:
     def __init__(self, id: int):
         self.id = id
+
+
+class UndoResponseMessageData:
+    def __init__(self, id: int, status: UndoStatus):
+        self.id = id
+        self.status = status
 
 
 class AckResponseData:
@@ -70,6 +84,22 @@ class UndoMessage:
                 "id": self.data.id
             }
         })
+
+
+class UndoResponseMessage:
+    def __init__(self, id: int, status: UndoStatus):
+        self.type = MessageType.Undo_response
+        self.data: UndoResponseMessageData = UndoResponseMessageData(id, status)
+
+    def __str__(self):
+        return json.dumps({
+            "type": self.type.name,
+            "data": {
+                "id": self.data.id,
+                "status": self.data.status.name
+            }
+        })
+
 
 class AckResponse:
     def __init__(self, id: int, command: str, message: str):

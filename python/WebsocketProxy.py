@@ -6,7 +6,8 @@ from websockets.server import serve
 from socket import socket as Socket
 from RtdeConnection import start_rtde_server
 from socket import gethostbyname, gethostname
-from SocketMessages import AckResponse, parse_message, CommandMessage, UndoMessage, MessageType
+from SocketMessages import AckResponse, parse_message, CommandMessage, UndoMessage, UndoResponseMessage, \
+    UndoStatus
 from RobotControl import send_command, get_interpreter_socket, send_wrapped_command, read_from_socket
 from typing import Final
 
@@ -26,7 +27,10 @@ def handle_command_message(message: CommandMessage, socket: Socket) -> str:
 
 
 def handle_undo_message(message: UndoMessage) -> str:
-    return str(message)
+    response = UndoResponseMessage(message.data.id, UndoStatus.Success)
+    print(f"Sending response: {response}")
+    return str(response)
+
 
 def get_handler(socket: Socket) -> callable:
     async def echo(websocket):

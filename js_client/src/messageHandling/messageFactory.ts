@@ -5,7 +5,7 @@ import {
     Message,
     MessageType,
     RobotStateMessage,
-    Status, UndoMessage
+    Status, UndoMessage, UndoResponseMessage, UndoStatus
 } from "./messageDefinitions";
 
 export function parseMessage(message: string): Message {
@@ -20,6 +20,8 @@ export function parseMessage(message: string): Message {
             return parseRobotStateMessage(parsed);
         case "Command_finished":
             return parseCommandFinishedMessage(parsed);
+        case "Undo_response":
+            return parseUndoResponseMessage(parsed);
         default:
             throw new Error(`Invalid message type: ${parsed.type}`);
     }
@@ -30,6 +32,13 @@ function parseStatus(status: string): Status {
         throw new Error(`Invalid status: ${status}`);
     }
     return status === "Ok" ? Status.Ok : Status.Error;
+}
+
+function parseUndoStatus(status: string): UndoStatus {
+    if (status !== "Success" && status !== "Error" && status !== "CommandDidNotExist" && status !== "CommandAlreadyUndone") {
+        throw new Error(`Invalid status: ${status}`);
+    }
+    return status as UndoStatus;
 }
 
 export function createCommandMessage(id: number, command: string): CommandMessage {
@@ -50,7 +59,6 @@ export function createUndoMessage(id: number): UndoMessage {
         }
     };
 }
-
 
 
 function parseAckResponseMessage(message: any): AckResponseMessage {
@@ -119,6 +127,19 @@ function parseCommandFinishedMessage(message: any): CommandFinishedMessage {
             id: noneGuard(message.data.id),
             command: noneGuard(message.data.command),
             variables: noneGuard(message.data.variables)
+        }
+    };
+}
+
+function parseUndoResponseMessage(message: any): UndoResponseMessage {
+    if (message.type !== "Undo_response") {
+        throw new Error(`Invalid message type: ${message.type}`);
+    }
+    return {
+        type: MessageType.UndoResponse,
+        data: {
+            id: noneGuard(message.data.id),
+            status: parseUndoStatus(message.data.status)
         }
     };
 }

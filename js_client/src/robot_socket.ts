@@ -34,6 +34,9 @@ function handleMessageFromProxyServer(message: Message) {
         case MessageType.CommandFinished:
             console.log('Command finished: ', message);
             break;
+        case MessageType.UndoResponse:
+            console.log('Undo response: ', message);
+            break;
         default:
             console.warn('invalid message type: ', message);
     }
