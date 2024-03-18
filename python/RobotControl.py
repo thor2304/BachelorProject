@@ -7,6 +7,8 @@ import select
 
 from RobotSocketMessages import CommandFinished, VariableObject, VariableTypes
 from SocketMessages import CommandMessage
+from undo.History import History
+from undo.State import State
 
 POLYSCOPE_IP = "polyscope"
 
@@ -102,7 +104,7 @@ def receive_input_commands(interpreter_socket: Socket):
 
 
 def send_test_commands(interpreter_socket: Socket):
-    send_wrapped_command("set_digital_out(0, False)\n", interpreter_socket)
+    send_user_command("set_digital_out(0, False)\n", interpreter_socket)
 
     send_command("set_digital_out(1, False)\n", interpreter_socket)
     send_command("set_digital_out(2, False)\n", interpreter_socket)
@@ -174,7 +176,7 @@ list_of_variables.append(VariableObject("__test__", VariableTypes.Integer, 2))
 list_of_variables.append(VariableObject("__test2__", VariableTypes.String, "f"))
 
 
-def send_wrapped_command(command: CommandMessage, on_socket: Socket) -> str:
+def send_user_command(command: CommandMessage, on_socket: Socket) -> str:
     command_message = command.data.command
     if command_message.endswith('\n'):
         command_message = command_message[:-1]
@@ -187,6 +189,9 @@ def send_wrapped_command(command: CommandMessage, on_socket: Socket) -> str:
 
     extra_len = len(wrapping) + 1  # the 1 is to remove the trailing \n character
 
+    History.get_history().new_command(command)
+    History.get_history().active_command_state().append_state(State())
+    History.get_history().debug_print()
     response = send_command(command_message, on_socket)
 
     return response[0:-extra_len]
