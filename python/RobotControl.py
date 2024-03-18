@@ -10,9 +10,9 @@ from SocketMessages import CommandMessage
 from undo.History import History
 from undo.State import State
 
-POLYSCOPE_IP = "polyscope"
-
 from ToolBox import escape_string, time_print
+
+POLYSCOPE_IP = "polyscope"
 
 
 def create_get_socket_function() -> Callable[[str, int], Socket]:
@@ -44,14 +44,6 @@ def create_get_socket_function() -> Callable[[str, int], Socket]:
 
 
 get_socket = create_get_socket_function()
-
-
-def main():
-    print("Starting RobotControl.py")
-    interpreter_socket: Socket = get_interpreter_socket()
-
-    interpreter_socket.close()
-
 
 _interpreter_open = False
 
@@ -92,67 +84,8 @@ def prepare_interpreter_session(interpreter_socket: Socket):
     send_command("__test2__ = \"f\"", interpreter_socket)
 
 
-def get_rtde_socket():
-    return get_socket(POLYSCOPE_IP, 30004)
-
-
-def receive_input_commands(interpreter_socket: Socket):
-    for i in range(30):
-        # print(my_socket.recv(2048))
-        action = input('Action?\n')
-        send_command(action, interpreter_socket)
-
-
-def send_test_commands(interpreter_socket: Socket):
-    send_user_command("set_digital_out(0, False)\n", interpreter_socket)
-
-    send_command("set_digital_out(1, False)\n", interpreter_socket)
-    send_command("set_digital_out(2, False)\n", interpreter_socket)
-
-    send_command("b=0\n", interpreter_socket)
-
-    send_command("set_digital_out(b, True)\n", interpreter_socket)
-
-    function_def: str = (
-        "def test():\n"
-        "a = True\n"
-        "set_digital_out(2, a)\n"
-        "set_digital_out(1, True)\n"
-        "end\n"
-        "test()\n"
-    )
-
-    # send_command(function_def, my_socket)
-
-    function_def_no_new_line = (
-        "def test():"
-        " out = "
-        " set_digital_out(2, a)                                                      "
-        " set_digital_out(1, True) "
-        " end "
-        " test()\n"
-    )
-    send_command(function_def_no_new_line, interpreter_socket)
-
-    function_connect_to_socket = (
-        'socket_open("proxy","8000")\n'
-        'def send(id):'
-        'out = "{\\"type\\": \\"Command\\", \\"data\\": {\\"id\\": " + id + ", \\"var1\\": " + var1 + "}}"'
-        'socket_send_string(out)'
-        'end'
-        'thread sending():'
-        'while True:'
-        'send(10)'
-        'end'
-        'end'
-    )
-
-    send_command("test()\n", interpreter_socket)
-
-    send_command('popup("post","post")', interpreter_socket)
-
-
 def send_command(command: str, on_socket: Socket) -> str:
+    """Returns the ack_response from the robot. The ack_response is a string."""
     if command.startswith("\n"):
         command = command[1:]
     command = command + '\n' if not command.endswith('\n') else command
@@ -303,4 +236,7 @@ def read_from_socket(socket: Socket) -> str:
 
 
 if __name__ == '__main__':
-    main()
+    print("Starting RobotControl.py")
+    interpreter_socket: Socket = get_interpreter_socket()
+
+    interpreter_socket.close()
