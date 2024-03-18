@@ -3,7 +3,7 @@ import {RobotStateMessageData} from "./messageHandling/messageDefinitions";
 const listId: 'stateVariableSelection' = "stateVariableSelection";
 const stateVariableSelectionList: HTMLElement = document.getElementById(listId);
 
-export function generateVariableSelection(data: RobotStateMessageData, callback: () => void): void {
+export function generateVariableSelection(data: RobotStateMessageData, handleCheckboxChange: () => void): void {
     if (isVariableSelectionGenerated()) {
         return;
     }
@@ -22,7 +22,7 @@ export function generateVariableSelection(data: RobotStateMessageData, callback:
         input.id = key;
         input.checked = true;
         input.disabled = false;
-        input.addEventListener('change', callback);
+        input.addEventListener('change', handleCheckboxChange);
         fragment.appendChild(clone);
     });
 
