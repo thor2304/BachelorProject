@@ -36,7 +36,7 @@ export function iterateMessageData(data: RobotStateMessageData): void {
     stateVariableView.id = id;
 
     Object.entries(data).forEach(([key, value]): void => {
-        if(listOfVariablesToDisplay().includes(key)){
+        if (listOfVariablesToDisplay().includes(key)) {
             if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
                 Object.entries(value).forEach(([innerKey, innerValue]): void => {
                     generateHtmlFromMessageData(innerKey, stateVariableView, innerValue);
@@ -54,13 +54,11 @@ export function iterateMessageData(data: RobotStateMessageData): void {
     }
 }
 
-function generateHtmlFromMessageData(messageDataKey: string,
-                                     stateVariableView: HTMLElement, messageDataValue:
-                                         stateMessageTypes): void {
+function generateHtmlFromMessageData(messageDataKey: string, stateVariableView: HTMLElement, messageDataValue: stateMessageTypes): void {
 
     const stateVariableSection: HTMLElement = document.createElement('section');
     stateVariableSection.classList.add('stateVariableSection', 'flex');
-    
+
     const sectionColumn45: HTMLDivElement = document.createElement('div');
     sectionColumn45.classList.add('column45');
 
