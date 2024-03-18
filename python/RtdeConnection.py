@@ -43,44 +43,66 @@ RTDE_WEBSOCKET_PORT = 8001
 TRANSMIT_FREQUENCY_IN_HERTZ = 60
 SLEEP_TIME = 1 / TRANSMIT_FREQUENCY_IN_HERTZ
 
+_ROBOT_STATE: DataObject | None = None
 
-async def start_rtde_server():
-    print("Starting RTDE Websocket")
-    async with serve(get_handler(), RTDE_WEBSOCKET_HOST, RTDE_WEBSOCKET_PORT):
-        await asyncio.Future()  # run forever
+
+async def start_rtde_loop():
+    con = rtde.RTDE(ROBOT_HOST, ROBOT_PORT)
+    con.connect()
+    # get controller version
+    con.get_controller_version()
+    # setup recipes
+    con.send_output_setup(state_names, state_types)
+    # start data synchronization
+    if not con.send_start():
+        sys.exit()
+
+    global _ROBOT_STATE
+
+    while True:
+        await asyncio.sleep(SLEEP_TIME)
+        try:
+            _ROBOT_STATE = con.receive()
+        except rtde.RTDEException as e:
+            print(f"Error in recieve_rtde_data: {e}")
 
 
 def states_are_equal(obj1: DataObject, obj2: DataObject):
     return obj1.__dict__ == obj2.__dict__
 
 
+async def send_state_through_websocket(websocket, state: DataObject):
+    if state is None:
+        return
+    await websocket.send(str(RobotState(state)))
+
+
 def get_handler() -> callable:
     async def handler(websocket, path):
         # Connecting to RTDE interface
-        con = rtde.RTDE(ROBOT_HOST, ROBOT_PORT)
-        con.connect()
-        # get controller version
-        con.get_controller_version()
-        # setup recipes
-        con.send_output_setup(state_names, state_types)
-        # start data synchronization
-        if not con.send_start():
-            sys.exit()
-
-        # Set initial state
-        initial_state = con.receive()
-        old_robot_state = initial_state
-        await websocket.send(str(RobotState(initial_state)))
+        local_robot_state: DataObject | None = None
 
         while True:
             await asyncio.sleep(SLEEP_TIME)
-            state = con.receive()
 
-            if states_are_equal(state, old_robot_state):
+            if local_robot_state is None and _ROBOT_STATE is not None:
+                local_robot_state = _ROBOT_STATE
+                await send_state_through_websocket(websocket, _ROBOT_STATE)
                 continue
 
-            old_robot_state = state
-            robot_state = RobotState(state)
-            await websocket.send(str(robot_state))
+            if local_robot_state is None and _ROBOT_STATE is None:
+                continue
+
+            if states_are_equal(local_robot_state, _ROBOT_STATE):
+                continue
+
+            local_robot_state = _ROBOT_STATE
+            await send_state_through_websocket(websocket, _ROBOT_STATE)
 
     return handler
+
+
+async def start_RTDE_websocket():
+    print("Starting RTDE Websocket")
+    async with serve(get_handler(), RTDE_WEBSOCKET_HOST, RTDE_WEBSOCKET_PORT):
+        await asyncio.Future()  # run forever
