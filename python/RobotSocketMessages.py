@@ -26,22 +26,16 @@ class VariableObject:
         self.variable_type = variable_type
         self.value = value
 
-    def dump(self):
+    def dump(self, ur_prep=False):
+        value = self.value if not ur_prep else f'\"\"{self.variable_type.value}{self.value}\"\"'
         return {
             "name": self.name,
             "type": self.variable_type.name,
-            "value": self.value
+            "value": value
         }
 
     def __str__(self):
         return json.dumps(self.dump())
-
-    def dump_ur_prep(self):
-        return {
-            "name": self.name,
-            "type": self.variable_type.name,
-            "value": f'\"\"{self.variable_type.value}{self.name}\"\"'
-        }
 
 
 class CommandFinishedData:
@@ -66,34 +60,17 @@ class CommandFinished:
         if self.command_contains_comment():
             raise ValueError("Command contains comment")
 
-        return json.dumps({
-            "type": self.type.name,
-            "data": {
-                "id": self.data.id,
-                "command": self.data.command,
-                "variables": [variable.dump() for variable in self.data.variables]
-            }
-        })
+        return json.dumps(self.dump())
 
-    def dump(self):
+    def dump(self, ur_prep=False):
         return {
             "type": self.type.name,
             "data": {
                 "id": self.data.id,
                 "command": self.data.command,
-                "variables": [variable.dump() for variable in self.data.variables]
-            }
-        }
-
-    def dump_ur_prep(self):
-        return {
-            "type": self.type.name,
-            "data": {
-                "id": self.data.id,
-                "command": self.data.command,
-                "variables": [variable.dump_ur_prep() for variable in self.data.variables]
+                "variables": [variable.dump(ur_prep) for variable in self.data.variables]
             }
         }
 
     def dump_ur_string(self):
-        return json.dumps(self.dump_ur_prep())
+        return json.dumps(self.dump(True))
