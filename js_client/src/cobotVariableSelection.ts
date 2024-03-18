@@ -1,4 +1,5 @@
-import {RobotStateMessageData} from "./messageHandling/messageDefinitions";
+import {RobotStateMessageData} from "./responseMessages/responseMessageDefinitions";
+
 
 const listId: 'stateVariableSelection' = "stateVariableSelection";
 const stateVariableSelectionList: HTMLElement = document.getElementById(listId);

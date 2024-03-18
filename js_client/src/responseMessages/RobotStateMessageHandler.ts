@@ -1,13 +1,10 @@
-import {
-    Message,
-    MessageType,
-    RobotStateMessage,
-    RobotStateMessageData,
-    stateMessageTypes
-} from "./messageDefinitions";
 import {generateVariableSelection, listOfVariablesToDisplay} from "../cobotVariableSelection";
-import {ResponseMessage, ResponseMessageType} from "./responseMessageDefinitions";
-import {emitCommandFinishedEvent} from "./MessageFinishedHandler";
+import {
+    ResponseMessage,
+    ResponseMessageType,
+    RobotStateMessage,
+    RobotStateMessageData, stateMessageTypes
+} from "./responseMessageDefinitions";
 
 
 let lastRobotStateMessage: RobotStateMessage;
