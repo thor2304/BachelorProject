@@ -31,7 +31,6 @@ def handle_undo_message(message: UndoMessage) -> str:
     return str(response)
 
 
-
 def get_handler(socket: Socket) -> callable:
     async def echo(websocket):
         async for message in websocket:
@@ -136,4 +135,3 @@ async def start_webserver():
     print("Starting websocket server")
     async with serve(get_handler(interpreter_socket), "0.0.0.0", 8767):
         await asyncio.Future()  # run forever
-

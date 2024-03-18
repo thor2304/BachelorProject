@@ -1,9 +1,11 @@
-import {createCommandMessage, createUndoMessage, parseMessage} from "./messageHandling/messageFactory";
-import {Message, MessageType} from "./messageHandling/messageDefinitions";
-import {handleAckResponseMessage} from "./messageHandling/AckResponseHandler";
-import {handleFeedbackMessage} from "./messageHandling/FeedbackMessageHandler";
-import {handleRobotStateMessage} from "./messageHandling/RobotStateMessageHandler";
+import {parseMessage} from "./responseMessages/responseMessageParsing";
+import {ResponseMessage, ResponseMessageType} from "./responseMessages/responseMessageDefinitions";
+import {handleAckResponseMessage} from "./responseMessages/AckResponseHandler";
+import {handleFeedbackMessage} from "./responseMessages/FeedbackMessageHandler";
+import {handleRobotStateMessage} from "./responseMessages/RobotStateMessageHandler";
 import {EventList} from "./interaction/EventList";
+import {createCommandMessage, createUndoMessage} from "./userMessages/userMessageFactory";
+import {UserMessage} from "./userMessages/userMessageDefinitions";
 
 function get_socket(ip: string, port: number) {
     const out = new WebSocket(
@@ -20,21 +22,21 @@ function get_socket(ip: string, port: number) {
     return out
 }
 
-function handleMessageFromProxyServer(message: Message) {
+function handleMessageFromProxyServer(message: ResponseMessage) {
     switch (message.type) {
-        case MessageType.AckResponse:
+        case ResponseMessageType.AckResponse:
             handleAckResponseMessage(message);
             break;
-        case MessageType.Feedback:
+        case ResponseMessageType.Feedback:
             handleFeedbackMessage(message);
             break;
-        case MessageType.RobotState:
+        case ResponseMessageType.RobotState:
             handleRobotStateMessage(message);
             break;
-        case MessageType.CommandFinished:
+        case ResponseMessageType.CommandFinished:
             console.log('Command finished: ', message);
             break;
-        case MessageType.UndoResponse:
+        case ResponseMessageType.UndoResponse:
             console.log('Undo response: ', message);
             break;
         default:
@@ -45,9 +47,9 @@ function handleMessageFromProxyServer(message: Message) {
 /**
  *
  * @param socket {WebSocket}
- * @param message {Message}
+ * @param message {UserMessage}
  */
-function send(socket: WebSocket, message: Message) {
+function send(socket: WebSocket, message: UserMessage) {
     if (socket.readyState === WebSocket.CLOSED) {
         console.log('socket closed');
         return;

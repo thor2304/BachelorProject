@@ -1,12 +1,12 @@
-import {Message, MessageType} from "./messageDefinitions";
+import {ResponseMessage, ResponseMessageType} from "./responseMessageDefinitions";
 import {getChildWithClass, getCommandEntry} from "../Toolbox/DomTools";
 import {emitCommandFinishedEvent} from "./MessageFinishedHandler";
 
 const errorClass = "error-response"
 const successClass = "success-response"
 
-export function handleAckResponseMessage(message: Message): void {
-    if (message.type !== MessageType.AckResponse) {
+export function handleAckResponseMessage(message: ResponseMessage): void {
+    if (message.type !== ResponseMessageType.AckResponse) {
         console.log('not an Ack_response message: ', message);
         return
     }

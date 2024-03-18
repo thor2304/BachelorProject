@@ -1,13 +1,11 @@
 // This is supposed to be a definitions file, but typescript is not good with enums in definition files.
 // This is not intended to house business logic, but to define the message types that the server and client will use.
 
-export enum MessageType {
-    Command = 'Command',
+export enum ResponseMessageType {
     AckResponse = 'Ack_response',
     Feedback = 'Feedback',
     RobotState = 'Robot_state',
     CommandFinished = 'Command_finished',
-    Undo = 'Undo',
     UndoResponse = 'Undo_response'
 }
 
@@ -17,26 +15,17 @@ export enum Status {
 }
 
 export enum UndoStatus {
-    Error = 'Error',
     Success = 'Success',
+    Error = 'Error',
     CommandDidNotExist = 'CommandDidNotExist',
     CommandAlreadyUndone = 'CommandAlreadyUndone'
 }
 
-export type Message = CommandMessage | UndoMessage | AckResponseMessage | FeedbackMessage | RobotStateMessage | CommandFinishedMessage | UndoResponseMessage
+export type ResponseMessage = AckResponseMessage | FeedbackMessage | RobotStateMessage | CommandFinishedMessage | UndoResponseMessage
 
 export type UndoResponseMessageData = {
     id: number,
     status: UndoStatus,
-}
-
-export type CommandMessageData = {
-    id: number,
-    command: string,
-}
-
-export type UndoMessageData = {
-    id: number
 }
 
 export type AckResponseMessageData = {
@@ -79,37 +68,27 @@ export type CommandFinishedMessageData = {
     variables: CommandFinishedVariable[]
 }
 
-export type CommandMessage = {
-    type: MessageType.Command,
-    data: CommandMessageData
-}
-
 export type UndoResponseMessage = {
-    type: MessageType.UndoResponse,
+    type: ResponseMessageType.UndoResponse,
     data: UndoResponseMessageData
 }
 
-export type UndoMessage = {
-    type: MessageType.Undo,
-    data: UndoMessageData
-}
-
 export type AckResponseMessage = {
-    type: MessageType.AckResponse,
+    type: ResponseMessageType.AckResponse,
     data: AckResponseMessageData
 }
 
 export type FeedbackMessage = {
-    type: MessageType.Feedback,
+    type: ResponseMessageType.Feedback,
     data: FeedbackMessageData
 }
 
 export type RobotStateMessage = {
-    type: MessageType.RobotState,
+    type: ResponseMessageType.RobotState,
     data: RobotStateMessageData
 }
 
 export type CommandFinishedMessage = {
-    type: MessageType.CommandFinished,
+    type: ResponseMessageType.CommandFinished,
     data: CommandFinishedMessageData
 }
