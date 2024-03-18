@@ -1,14 +1,13 @@
 import {
     AckResponseMessage, CommandFinishedMessage,
-    CommandMessage,
     FeedbackMessage,
-    Message,
-    MessageType,
+    ResponseMessage,
+    ResponseMessageType,
     RobotStateMessage,
-    Status
-} from "./messageDefinitions";
+    Status, UndoResponseMessage, UndoStatus
+} from "./responseMessageDefinitions";
 
-export function parseMessage(message: string): Message {
+export function parseMessage(message: string): ResponseMessage {
     const parsed = JSON.parse(message);
 
     switch (parsed.type) {
@@ -20,36 +19,33 @@ export function parseMessage(message: string): Message {
             return parseRobotStateMessage(parsed);
         case "Command_finished":
             return parseCommandFinishedMessage(parsed);
+        case "Undo_response":
+            return parseUndoResponseMessage(parsed);
         default:
             throw new Error(`Invalid message type: ${parsed.type}`);
     }
 }
 
 function parseStatus(status: string): Status {
-    if (status !== "Ok" && status !== "Error") {
+    if (!(status in Status)) {
         throw new Error(`Invalid status: ${status}`);
     }
     return status === "Ok" ? Status.Ok : Status.Error;
 }
 
-export function createCommandMessage(id: number, command: string): CommandMessage {
-    return {
-        type: MessageType.Command,
-        data: {
-            id: id,
-            command: command,
-        }
-    };
+function parseUndoStatus(status: string): UndoStatus {
+    if (!(status in UndoStatus)) {
+        throw new Error(`Invalid undo status: ${status}`);
+    }
+    return status as UndoStatus;
 }
-
-
 
 function parseAckResponseMessage(message: any): AckResponseMessage {
     if (message.type !== "Ack_response") {
         throw new Error(`Invalid message type: ${message.type}`);
     }
     return {
-        type: MessageType.AckResponse,
+        type: ResponseMessageType.AckResponse,
         data: {
             id: noneGuard(message.data.id),
             status: parseStatus(message.data.status),
@@ -64,7 +60,7 @@ function parseFeedbackMessage(message: any): FeedbackMessage {
         throw new Error(`Invalid message type: ${message.type}`);
     }
     return {
-        type: MessageType.Feedback,
+        type: ResponseMessageType.Feedback,
         data: {
             id: noneGuard(message.data.id),
             message: noneGuard(message.data.message)
@@ -84,7 +80,7 @@ function parseRobotStateMessage(message: any): RobotStateMessage {
         throw new Error(`Invalid message type: ${message.type}`);
     }
     return {
-        type: MessageType.RobotState,
+        type: ResponseMessageType.RobotState,
         data: {
             safety_status: noneGuard(message.data.safety_status),
             runtime_state: noneGuard(message.data.runtime_state),
@@ -105,11 +101,24 @@ function parseCommandFinishedMessage(message: any): CommandFinishedMessage {
         throw new Error(`Invalid message type: ${message.type}`);
     }
     return {
-        type: MessageType.CommandFinished,
+        type: ResponseMessageType.CommandFinished,
         data: {
             id: noneGuard(message.data.id),
             command: noneGuard(message.data.command),
             variables: noneGuard(message.data.variables)
+        }
+    };
+}
+
+function parseUndoResponseMessage(message: any): UndoResponseMessage {
+    if (message.type !== "Undo_response") {
+        throw new Error(`Invalid message type: ${message.type}`);
+    }
+    return {
+        type: ResponseMessageType.UndoResponse,
+        data: {
+            id: noneGuard(message.data.id),
+            status: parseUndoStatus(message.data.status)
         }
     };
 }

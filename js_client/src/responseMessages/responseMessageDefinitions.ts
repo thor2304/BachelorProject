@@ -1,12 +1,12 @@
 // This is supposed to be a definitions file, but typescript is not good with enums in definition files.
 // This is not intended to house business logic, but to define the message types that the server and client will use.
 
-export enum MessageType {
-    Command = 'Command',
+export enum ResponseMessageType {
     AckResponse = 'Ack_response',
     Feedback = 'Feedback',
     RobotState = 'Robot_state',
-    CommandFinished = 'Command_finished'
+    CommandFinished = 'Command_finished',
+    UndoResponse = 'Undo_response'
 }
 
 export enum Status {
@@ -14,11 +14,18 @@ export enum Status {
     Error = 'Error'
 }
 
-export type Message = CommandMessage | AckResponseMessage | FeedbackMessage | RobotStateMessage | CommandFinishedMessage
+export enum UndoStatus {
+    Success = 'Success',
+    Error = 'Error',
+    CommandDidNotExist = 'CommandDidNotExist',
+    CommandAlreadyUndone = 'CommandAlreadyUndone'
+}
 
-export type CommandMessageData = {
+export type ResponseMessage = AckResponseMessage | FeedbackMessage | RobotStateMessage | CommandFinishedMessage | UndoResponseMessage
+
+export type UndoResponseMessageData = {
     id: number,
-    command: string,
+    status: UndoStatus,
 }
 
 export type AckResponseMessageData = {
@@ -66,27 +73,27 @@ export type CommandFinishedMessageData = {
     variables: CommandFinishedVariable[]
 }
 
-export type CommandMessage = {
-    type: MessageType.Command,
-    data: CommandMessageData
+export type UndoResponseMessage = {
+    type: ResponseMessageType.UndoResponse,
+    data: UndoResponseMessageData
 }
 
 export type AckResponseMessage = {
-    type: MessageType.AckResponse,
+    type: ResponseMessageType.AckResponse,
     data: AckResponseMessageData
 }
 
 export type FeedbackMessage = {
-    type: MessageType.Feedback,
+    type: ResponseMessageType.Feedback,
     data: FeedbackMessageData
 }
 
 export type RobotStateMessage = {
-    type: MessageType.RobotState,
+    type: ResponseMessageType.RobotState,
     data: RobotStateMessageData
 }
 
 export type CommandFinishedMessage = {
-    type: MessageType.CommandFinished,
+    type: ResponseMessageType.CommandFinished,
     data: CommandFinishedMessageData
 }

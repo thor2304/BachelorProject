@@ -5,7 +5,8 @@ from time import sleep
 from websockets.server import serve
 from socket import socket as Socket
 from socket import gethostbyname, gethostname
-from SocketMessages import parse_command_message, AckResponse
+from SocketMessages import AckResponse, parse_message, CommandMessage, UndoMessage, UndoResponseMessage, \
+    UndoStatus
 from RobotControl import send_command, get_interpreter_socket, send_wrapped_command, read_from_socket
 from typing import Final
 
@@ -15,18 +16,37 @@ _END_BYTE: Final = b'\x03'
 _EMPTY_BYTE: Final = b''
 
 
+def handle_command_message(message: CommandMessage, socket: Socket) -> str:
+    command_string = message.data.command
+    result = send_wrapped_command(message, socket)
+    response = AckResponse(message.data.id, command_string, result)
+    str_response = str(response)
+    print(f"Sending response: {str_response}")
+    return str_response
+
+
+def handle_undo_message(message: UndoMessage) -> str:
+    response = UndoResponseMessage(message.data.id, UndoStatus.Success)
+    print(f"Sending response: {response}")
+    return str(response)
+
+
 def get_handler(socket: Socket) -> callable:
     async def echo(websocket):
         async for message in websocket:
-            command_message = parse_command_message(message)
-            command_string = command_message.data.command
-            result = send_wrapped_command(command_message, socket)
-            # command = parse_command_message(message)
-            # result = send_command(command.data.command, socket)
-            # response = AckResponse(command.data.id, command.data.command, result)
-            response = AckResponse(command_message.data.id, command_string, result)
-            str_response = str(response)
-            print(f"Sending response: {str_response}")
+            print(f"Received message: {message}")
+
+            message = parse_message(message)
+
+            match message:
+                case CommandMessage():
+                    str_response = handle_command_message(message, socket)
+                    print(f"Message is a CommandMessage")
+                case UndoMessage():
+                    str_response = handle_undo_message(message)
+                    print(f"Message is an UndoMessage")
+                case _:
+                    raise ValueError(f"Unknown message type: {message}")
 
             await websocket.send(str_response)
 
@@ -115,4 +135,3 @@ async def start_webserver():
     print("Starting websocket server")
     async with serve(get_handler(interpreter_socket), "0.0.0.0", 8767):
         await asyncio.Future()  # run forever
-

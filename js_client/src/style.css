@@ -148,6 +148,10 @@ p {
     border-style: dashed;
 }
 
+.field.undone {
+    background-color: var(--undone-color);
+}
+
 #stateVariablePopup {
     width: 100%;
     cursor: pointer;

@@ -12,6 +12,7 @@ module.exports = {
         elements: './src/elements.css',
         robot_3d_plot: './src/robot3dplot.png',
         dark_mode: './src/Toolbox/auto_dark_mode.ts',
+        undo_handler: './src/undoEventHandler.ts',
     },
     devtool: 'inline-source-map',
     devServer: {

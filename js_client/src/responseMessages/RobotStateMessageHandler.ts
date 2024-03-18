@@ -6,12 +6,14 @@ import {
     stateMessageTypes
 } from "./messageDefinitions";
 import {generateVariableSelection, listOfVariablesToDisplay} from "../cobotVariableSelection";
+import {ResponseMessage, ResponseMessageType} from "./responseMessageDefinitions";
+import {emitCommandFinishedEvent} from "./MessageFinishedHandler";
 
 
 let lastRobotStateMessage: RobotStateMessage;
 
-export function handleRobotStateMessage(message: Message): void {
-    if (message.type !== MessageType.RobotState) {
+export function handleRobotStateMessage(message: ResponseMessage): void {
+    if (message.type !== ResponseMessageType.RobotState) {
         console.log('not a Robot_state message: ', message);
         return;
     }

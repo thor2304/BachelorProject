@@ -27,6 +27,16 @@ The server will respond with an `ack_response` message.
 }
 ```
 
+## Undo
+```json
+{
+  "type": "Undo",
+  "data": {
+    "id": 1
+  }
+}
+```
+
 # Server sent -> Client
 
 ---
@@ -40,6 +50,17 @@ The server will respond with an `ack_response` message.
     "command": "set_digital_out(1,True)",
     "status": "Enum<Ok|Error>",
     "message": "optional message"
+  }
+}
+```
+
+## UndoResponse
+```json
+{
+  "type": "Undo_response",
+  "data": {
+    "id": 1,
+    "status": "Enum<Ok|Error|CommandDidNotExist|CommandAlreadyUndone>"
   }
 }
 ```
