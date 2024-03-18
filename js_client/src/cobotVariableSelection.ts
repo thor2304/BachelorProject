@@ -3,6 +3,8 @@ import {RobotStateMessageData} from "./messageHandling/messageDefinitions";
 const listId: 'stateVariableSelection' = "stateVariableSelection";
 const stateVariableSelectionList: HTMLElement = document.getElementById(listId);
 
+const checkboxes: NodeListOf<HTMLInputElement> = stateVariableSelectionList.querySelectorAll('.dropdown-item input[type="checkbox"]');
+
 export function generateVariableSelection(data: RobotStateMessageData, callback: () => void): void {
     if (isVariableSelectionGenerated()) {
         return;
@@ -13,7 +15,7 @@ export function generateVariableSelection(data: RobotStateMessageData, callback:
     const startLiElement: HTMLLIElement = stateVariableSelectionList.firstElementChild as HTMLLIElement;
     const clonedLiElement: HTMLLIElement = startLiElement.cloneNode(true) as HTMLLIElement;
 
-    const handleChange = () => {
+    const handleChange = (): void  => {
         callback();
     };
 
@@ -44,7 +46,6 @@ function getListOfCheckedVariables(listOfNode: NodeListOf<HTMLInputElement>): st
 }
 
 export function listOfVariablesToDisplay(): string[] {
-    const checkboxes: NodeListOf<HTMLInputElement> = stateVariableSelectionList.querySelectorAll('.dropdown-item input[type="checkbox"]');
     return getListOfCheckedVariables(checkboxes);
 
 }
