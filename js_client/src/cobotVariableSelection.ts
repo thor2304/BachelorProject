@@ -13,10 +13,6 @@ export function generateVariableSelection(data: RobotStateMessageData, callback:
     const startLiElement: HTMLLIElement = stateVariableSelectionList.firstElementChild as HTMLLIElement;
     const clonedLiElement: HTMLLIElement = startLiElement.cloneNode(true) as HTMLLIElement;
 
-    const handleChange = () => {
-        callback();
-    };
-
     Object.entries(data).forEach(([key]): void => {
         const clone: HTMLLIElement = clonedLiElement.cloneNode(true) as HTMLLIElement;
         const label: HTMLLabelElement = clone.querySelector('label');
@@ -26,7 +22,7 @@ export function generateVariableSelection(data: RobotStateMessageData, callback:
         input.id = key;
         input.checked = true;
         input.disabled = false;
-        input.addEventListener('change', handleChange);
+        input.addEventListener('change', callback);
         fragment.appendChild(clone);
     });
 
