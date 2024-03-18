@@ -27,15 +27,15 @@ export function parseMessage(message: string): ResponseMessage {
 }
 
 function parseStatus(status: string): Status {
-    if (status !== "Ok" && status !== "Error") {
+    if (!(status in Status)) {
         throw new Error(`Invalid status: ${status}`);
     }
     return status === "Ok" ? Status.Ok : Status.Error;
 }
 
 function parseUndoStatus(status: string): UndoStatus {
-    if (status !== "Success" && status !== "Error" && status !== "CommandDidNotExist" && status !== "CommandAlreadyUndone") {
-        throw new Error(`Invalid status: ${status}`);
+    if (!(status in UndoStatus)) {
+        throw new Error(`Invalid undo status: ${status}`);
     }
     return status as UndoStatus;
 }
