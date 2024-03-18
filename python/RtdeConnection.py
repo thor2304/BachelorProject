@@ -26,7 +26,7 @@ import sys
 
 from rtde import rtde_config, rtde
 from rtde.serialize import DataObject
-from websockets.server import serve
+from websockets.server import serve, WebSocketServerProtocol
 from SocketMessages import RobotState
 from RobotControl import POLYSCOPE_IP
 
@@ -71,14 +71,14 @@ def states_are_equal(obj1: DataObject, obj2: DataObject):
     return obj1.__dict__ == obj2.__dict__
 
 
-async def send_state_through_websocket(websocket, state: DataObject):
+async def send_state_through_websocket(websocket: WebSocketServerProtocol, state: DataObject):
     if state is None:
         return
     await websocket.send(str(RobotState(state)))
 
 
 def get_handler() -> callable:
-    async def handler(websocket, path):
+    async def handler(websocket: WebSocketServerProtocol):
         # Connecting to RTDE interface
         local_robot_state: DataObject | None = None
 
