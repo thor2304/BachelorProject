@@ -47,6 +47,19 @@
                 </div>
                 <div class="variableViewColum stateVariableView" id="stateVariables">
                     <h2>Cobot state:</h2>
+                    <div class="dropdown">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuClickableInside" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+                            Select state variables
+                        </button>
+                        <ul class="dropdown-menu" id="stateVariableSelection" aria-labelledby="dropdownMenuClickableInside">
+                            <li>
+                                <div class="form-check dropdown-item">
+                                    <input class="form-check-input" type="checkbox" id="stateVariableCheckbox" disabled>
+                                    <label class="form-check-label" for="stateVariableCheckbox">Needs to get a state from the robot</label>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
                     <div id="stateVariablePopup" class="hidden">
                     </div>
                     <div id="stateVariableDisplay">

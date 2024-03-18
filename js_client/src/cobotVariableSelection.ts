@@ -1,48 +1,30 @@
 import {RobotStateMessageData} from "./messageHandling/messageDefinitions";
+import {iterateMessageData, savedRobotStateMessage} from "./messageHandling/RobotStateMessageHandler";
 
-document.addEventListener('click', (event: MouseEvent): void => {
-    const stateVariablePopup: HTMLElement = document.getElementById('stateVariablePopup');
-    if (stateVariablePopup && stateVariablePopup.classList.contains('hidden')) {
-        stateVariablePopup.classList.remove('hidden');
-    } else {
-        stateVariablePopup.classList.add('hidden');
-    }
-});
+const listId: 'stateVariableSelection' = "stateVariableSelection";
+const stateVariableSelectionList: HTMLElement = document.getElementById(listId);
 
 export function generateVariableSelection(data: RobotStateMessageData): void {
-    const id: 'cobotStateVariablesSelectionDisplay' = "cobotStateVariablesSelectionDisplay"
-    const oldStateVariableSelection: HTMLElement = document.getElementById(id);
-    const stateVariableSelection: HTMLElement = document.createElement('div');
-    const headline: HTMLHeadingElement = document.createElement('h3');
-    stateVariableSelection.id = id;
+    const fragment: DocumentFragment = document.createDocumentFragment();
 
-    headline.textContent = 'Select State Variables';
-    stateVariableSelection.appendChild(headline);
-
+    const startLiElement: HTMLLIElement = stateVariableSelectionList.firstElementChild as HTMLLIElement;
+    const clonedLiElement: HTMLLIElement = startLiElement.cloneNode(true) as HTMLLIElement;
 
     Object.entries(data).forEach(([key]): void => {
-        const variableInputWrapper: HTMLDivElement = document.createElement('div');
-        variableInputWrapper.classList.add('stateVariableSelectionWrapper');
-        const variableInputLabel: HTMLLabelElement = document.createElement('label');
-        const variableInput: HTMLInputElement = document.createElement('input');
-
-        variableInputLabel.textContent = key;
-        variableInputLabel.htmlFor = key;
-
-        variableInput.type = 'checkbox';
-        variableInput.checked = true;
-        variableInput.id = key;
-        variableInput.name = key;
-        variableInput.classList.add('Checkbox');
-
-        variableInputWrapper.appendChild(variableInput);
-        variableInputWrapper.appendChild(variableInputLabel);
-        stateVariableSelection.appendChild(variableInputWrapper);
+        const clone: HTMLLIElement = clonedLiElement.cloneNode(true) as HTMLLIElement;
+        const label: HTMLLabelElement = clone.querySelector('label');
+        const input: HTMLInputElement = clone.querySelector('input');
+        label.htmlFor = key;
+        label.textContent = key;
+        input.id = key;
+        input.checked = true;
+        input.addEventListener('change', checkboxChanged);
+        fragment.appendChild(clone);
     });
 
-
-    if (!oldStateVariableSelection) {
-        document.getElementById('stateVariablePopup').appendChild(stateVariableSelection);
+    if(!isVariableSelectionGenerated()){
+        stateVariableSelectionList.replaceChildren(fragment);
+        return;
     }
 }
 
@@ -54,4 +36,12 @@ export function getListOfCheckedVariables(listOfNode: NodeListOf<HTMLInputElemen
         }
     });
     return checkedVariables;
+}
+
+function isVariableSelectionGenerated(): boolean {
+    return !stateVariableSelectionList.firstElementChild.isSameNode(stateVariableSelectionList.lastElementChild);
+}
+
+function checkboxChanged(): void {
+    iterateMessageData(savedRobotStateMessage.data);
 }

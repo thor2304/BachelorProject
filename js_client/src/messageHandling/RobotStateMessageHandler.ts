@@ -1,30 +1,39 @@
-import {Message, MessageType, RobotStateMessageData, stateMessageTypes, TCPInformation} from "./messageDefinitions";
+import {
+    Message,
+    MessageType,
+    RobotStateMessage,
+    RobotStateMessageData,
+    stateMessageTypes,
+    TCPInformation
+} from "./messageDefinitions";
 import {generateVariableSelection, getListOfCheckedVariables} from "../cobotVariableSelection";
-import {emitCommandFinishedEvent} from "./MessageFinishedHandler";
+
+export let savedRobotStateMessage: RobotStateMessage;
 
 export function handleRobotStateMessage(message: Message): void {
     if (message.type !== MessageType.RobotState) {
         console.log('not a Robot_state message: ', message);
         return;
     }
-    iterateMessageData(message.data);
+
+    savedRobotStateMessage = message;
+
     generateVariableSelection(message.data);
+    iterateMessageData(message.data);
 }
 
-function iterateMessageData(data: RobotStateMessageData): void {
+export function iterateMessageData(data: RobotStateMessageData): void {
     const id: 'stateVariableDisplay' = "stateVariableDisplay"
     const oldStateVariableView: HTMLElement = document.getElementById(id);
     const stateVariableView: HTMLElement = document.createElement('div');
     stateVariableView.id = id;
 
-    const listOfSelectionNodes: NodeListOf<HTMLInputElement> = document.querySelectorAll('.stateVariableSelectionWrapper input');
+    const selectionList: HTMLUListElement = document.getElementById('stateVariableSelection') as HTMLUListElement;
+    const checkboxes: NodeListOf<HTMLInputElement> = selectionList.querySelectorAll('.dropdown-item input[type="checkbox"]');
 
     Object.entries(data).forEach(([key, value]): void => {
-        if(getListOfCheckedVariables(listOfSelectionNodes).includes(key)){
+        if(getListOfCheckedVariables(checkboxes).includes(key)){
             if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
-    //            const headline: HTMLElement = document.createElement('h3');
-    //            headline.textContent = key;
-    //            stateVariableView.appendChild(headline);
                 Object.entries(value).forEach(([innerKey, innerValue]): void => {
                     generateHtmlFromMessageData(innerKey, stateVariableView, innerValue);
                 });
