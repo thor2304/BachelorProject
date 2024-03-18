@@ -3,8 +3,7 @@ import {
     MessageType,
     RobotStateMessage,
     RobotStateMessageData,
-    stateMessageTypes,
-    TCPInformation
+    stateMessageTypes
 } from "./messageDefinitions";
 import {generateVariableSelection, listOfVariablesToDisplay} from "../cobotVariableSelection";
 
@@ -29,7 +28,7 @@ function replayRobotStateMessage(): void {
     }
 }
 
-export function iterateMessageData(data: RobotStateMessageData): void {
+function iterateMessageData(data: RobotStateMessageData): void {
     const id: 'stateVariableDisplay' = "stateVariableDisplay"
     const oldStateVariableView: HTMLElement = document.getElementById(id);
     const stateVariableView: HTMLElement = document.createElement('div');
