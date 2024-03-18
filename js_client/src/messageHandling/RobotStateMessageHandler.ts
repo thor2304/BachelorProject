@@ -56,7 +56,7 @@ export function iterateMessageData(data: RobotStateMessageData): void {
 
 function generateHtmlFromMessageData(messageDataKey: string,
                                      stateVariableView: HTMLElement, messageDataValue:
-                                         TCPInformation | number | [number, number, number, number, number, number] | string): void {
+                                         stateMessageTypes): void {
 
     const stateVariableSection: HTMLElement = document.createElement('section');
     stateVariableSection.classList.add('stateVariableSection', 'flex');
