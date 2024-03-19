@@ -30,7 +30,10 @@ class CommandStates:
         return output
 
     def __str__(self):
-        return f"User Command: {self.user_command}, States: {self.states}, Collapsed: {self.collapsed}"
+        states = []
+        if self.states is None:
+            states = "None"
+        return f"User Command: {self.user_command}, States: {states}, Collapsed: {self.collapsed}"
 
     def __repr__(self):
         return self.__str__()

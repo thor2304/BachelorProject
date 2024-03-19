@@ -5,8 +5,6 @@ from undo.CommandStates import CommandStates
 
 
 class History(object):
-    _instance: Self | None = None
-
     def __new__(cls):
         if not hasattr(cls, '_instance'):
             cls._instance = super(History, cls).__new__(cls)
@@ -29,8 +27,3 @@ class History(object):
         for key, value in self.command_state_history.items():
             debug_string += f"\tKey: {key}, Value: {value}\n"
         print(debug_string)
-
-    @classmethod
-    def get_history(cls) -> Self:
-        """Returns a singleton history instance"""
-        return cls._instance

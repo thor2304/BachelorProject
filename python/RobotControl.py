@@ -7,10 +7,9 @@ import select
 
 from RobotSocketMessages import CommandFinished, VariableObject, VariableTypes
 from SocketMessages import CommandMessage
+from ToolBox import escape_string, time_print
 from undo.History import History
 from undo.State import State
-
-from ToolBox import escape_string, time_print
 
 POLYSCOPE_IP = "polyscope"
 
@@ -122,9 +121,10 @@ def send_user_command(command: CommandMessage, on_socket: Socket) -> str:
 
     extra_len = len(wrapping) + 1  # the 1 is to remove the trailing \n character
 
-    History.get_history().new_command(command)
-    History.get_history().active_command_state().append_state(State())
-    History.get_history().debug_print()
+    history = History()
+    history.new_command(command)
+    history.active_command_state().append_state(State())
+    history.debug_print()
     response = send_command(command_message, on_socket)
 
     return response[0:-extra_len]

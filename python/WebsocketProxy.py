@@ -1,17 +1,15 @@
 import asyncio
 from asyncio import StreamReader, StreamWriter
-from time import sleep
-
-from websockets.server import serve
-from socket import socket as Socket
-from RtdeConnection import start_rtde_server
 from socket import gethostbyname, gethostname
-from SocketMessages import parse_command_message, AckResponse
-from RobotControl import send_command, get_interpreter_socket, send_user_command, read_from_socket
+from socket import socket as Socket
+from time import sleep
 from typing import Final
 
-from undo.History import History
-from undo.HistorySupport import HistorySupport
+from websockets.server import serve
+
+from RobotControl import send_command, get_interpreter_socket, send_user_command, read_from_socket
+from RtdeConnection import start_rtde_server
+from SocketMessages import parse_command_message, AckResponse
 
 clients = dict()
 _START_BYTE: Final = b'\x02'
@@ -21,7 +19,6 @@ _EMPTY_BYTE: Final = b''
 
 def get_handler(interpreter_socket: Socket) -> callable:
     async def echo(websocket):
-        History.get_history()
         async for message in websocket:
             command_message = parse_command_message(message)
             command_string = command_message.data.command
@@ -120,7 +117,13 @@ async def client_task(reader: StreamReader, writer: StreamWriter):
 
             for message in list_of_data:
                 if message:
-                    print(f"Messages decoded: {message.decode()}")
+                    message_from_robot_received(message)
+
+
+def message_from_robot_received(message: bytes):
+    decoded_message = message.decode()
+    print(f"Message from robot: {decoded_message}")
+
 
 
 async def start_webserver():
