@@ -83,11 +83,75 @@ def prepare_interpreter_session(interpreter_socket: Socket):
     send_command("__test2__ = \"f\"", interpreter_socket)
 
 
+def get_rtde_socket():
+    return get_socket(POLYSCOPE_IP, 30004)
+
+
+def receive_input_commands(interpreter_socket: Socket):
+    for i in range(30):
+        # print(my_socket.recv(2048))
+        action = input('Action?\n')
+        send_command(action, interpreter_socket)
+
+
+def send_test_commands(interpreter_socket: Socket):
+    send_wrapped_command("set_digital_out(0, False)\n", interpreter_socket)
+
+    send_command("set_digital_out(1, False)\n", interpreter_socket)
+    send_command("set_digital_out(2, False)\n", interpreter_socket)
+
+    send_command("b=0\n", interpreter_socket)
+
+    send_command("set_digital_out(b, True)\n", interpreter_socket)
+
+    function_def: str = (
+        "def test():\n"
+        "a = True\n"
+        "set_digital_out(2, a)\n"
+        "set_digital_out(1, True)\n"
+        "end\n"
+        "test()\n"
+    )
+
+    # send_command(function_def, my_socket)
+
+    function_def_no_new_line = (
+        "def test():"
+        " out = "
+        " set_digital_out(2, a)                                                      "
+        " set_digital_out(1, True) "
+        " end "
+        " test()\n"
+    )
+    send_command(function_def_no_new_line, interpreter_socket)
+
+    function_connect_to_socket = (
+        'socket_open("proxy","8000")\n'
+        'def send(id):'
+        'out = "{\\"type\\": \\"Command\\", \\"data\\": {\\"id\\": " + id + ", \\"var1\\": " + var1 + "}}"'
+        'socket_send_string(out)'
+        'end'
+        'thread sending():'
+        'while True:'
+        'send(10)'
+        'end'
+        'end'
+    )
+
+    send_command("test()\n", interpreter_socket)
+
+    send_command('popup("post","post")', interpreter_socket)
+
+
+def sanitize_command(command: str) -> str:
+    command = command.replace('\n', ' ')
+    command += "\n" # Add a trailing \n character
+    return command
+
+
 def send_command(command: str, on_socket: Socket) -> str:
     """Returns the ack_response from the robot. The ack_response is a string."""
-    if command.startswith("\n"):
-        command = command[1:]
-    command = command + '\n' if not command.endswith('\n') else command
+    command = sanitize_command(command)
     print(f"Sending the following command: '{escape_string(command)}'")
     on_socket.send(command.encode())
     result = read_from_socket(on_socket)
@@ -110,9 +174,6 @@ list_of_variables.append(VariableObject("__test2__", VariableTypes.String, "f"))
 
 def send_user_command(command: CommandMessage, on_socket: Socket) -> str:
     command_message = command.data.command
-    if command_message.endswith('\n'):
-        command_message = command_message[:-1]
-
     finish_command = CommandFinished(command.data.id, command_message, tuple(list_of_variables))
     string_command = finish_command.dump_ur_string()
     print(f"String command: {string_command}")

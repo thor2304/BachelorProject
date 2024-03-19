@@ -1,8 +1,8 @@
-import {Message, MessageType} from "./messageDefinitions";
+import {ResponseMessage, ResponseMessageType} from "./responseMessageDefinitions";
 import {EventList} from "../interaction/EventList";
 
-export function handleCommandFinishedMessage(message: Message): void {
-    if (message.type !== MessageType.CommandFinished) {
+export function handleCommandFinishedMessage(message: ResponseMessage): void {
+    if (message.type !== ResponseMessageType.CommandFinished) {
         console.log('not a Command_finished message: ', message);
         return;
     }
@@ -10,8 +10,8 @@ export function handleCommandFinishedMessage(message: Message): void {
     throw new Error('Command_finished message handler not implemented');
 }
 
-export function emitCommandFinishedEvent(message: Message): void {
-    if (message.type !== MessageType.CommandFinished) {
+export function emitCommandFinishedEvent(message: ResponseMessage): void {
+    if (message.type !== ResponseMessageType.CommandFinished) {
         console.warn('not a Command_finished message: ', message,
             "initial implementation will continue to emit event");
     }

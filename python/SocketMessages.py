@@ -7,9 +7,11 @@ from rtde.serialize import DataObject
 
 class MessageType(Enum):
     Command = auto()
+    Undo = auto()
     Ack_response = auto()
     Feedback = auto()
     Robot_state = auto()
+    Undo_response = auto()
 
 
 class Status(Enum):
@@ -26,10 +28,28 @@ class Status(Enum):
             raise ValueError(f"Unknown status message: '{message}'")
 
 
+class UndoStatus(Enum):
+    Success = auto()
+    Error = auto()
+    CommandDidNotExist = auto()
+    CommandAlreadyUndone = auto()
+
+
 class CommandMessageData:
     def __init__(self, id: int, command: str):
         self.id = id
         self.command = command
+
+
+class UndoMessageData:
+    def __init__(self, id: int):
+        self.id = id
+
+
+class UndoResponseMessageData:
+    def __init__(self, id: int, status: UndoStatus):
+        self.id = id
+        self.status = status
 
 
 class AckResponseData:
@@ -65,6 +85,35 @@ class CommandMessage:
 
     def __repr__(self):
         return self.__str__()
+
+
+class UndoMessage:
+    def __init__(self, id: int):
+        self.type = MessageType.Undo
+        self.data: UndoMessageData = UndoMessageData(id)
+
+    def __str__(self):
+        return json.dumps({
+            "type": self.type.name,
+            "data": {
+                "id": self.data.id
+            }
+        })
+
+
+class UndoResponseMessage:
+    def __init__(self, id: int, status: UndoStatus):
+        self.type = MessageType.Undo_response
+        self.data: UndoResponseMessageData = UndoResponseMessageData(id, status)
+
+    def __str__(self):
+        return json.dumps({
+            "type": self.type.name,
+            "data": {
+                "id": self.data.id,
+                "status": self.data.status.name
+            }
+        })
 
 
 class AckResponse:
@@ -401,8 +450,25 @@ def ensure_type_of_payload(payload: any) -> float:
     return payload
 
 
-def parse_command_message(message: str) -> CommandMessage:
+def parse_message(message: str) -> CommandMessage | UndoMessage:
     parsed = json.loads(message)
-    if parsed["type"] != MessageType.Command.name:
-        raise ValueError(f"Message type: {parsed['type']} is not of type Command {MessageType.Command.name}")
-    return CommandMessage(parsed["data"]["id"], parsed["data"]["command"])
+    print(f"parsed: {parsed}")
+
+    match parsed:
+        case {
+            'type': MessageType.Command.name,
+            'data': {
+                'id': id,
+                'command': command
+            }
+        }:
+            return CommandMessage(id, command)
+        case {
+            'type': MessageType.Undo.name,
+            'data': {
+                'id': id
+            }
+        }:
+            return UndoMessage(id)
+        case _:
+            raise ValueError(f"Unknown message structure: {parsed}")

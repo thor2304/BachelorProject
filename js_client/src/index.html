@@ -24,9 +24,7 @@
 <body>
     <div class="flex row sb">
         <div class="flex column commandArea sb">
-            <div class="commandHistory slate">
-                <ol type="1" id="commandList">
-                </ol>
+            <div class="commandHistory slate" id="commandHistoryDisplay">
             </div>
             <div id="syntax-display" class="slate">
                 <p></p>
@@ -40,8 +38,32 @@
             <div class="robotVisualization slate">
                 <img src='<%=require("./robot3dplot.png")%>' alt="Cobot 3d plot visualization"/>
             </div>
-            <div class="variableVisualization slate">
-                <p>Here there will be a variable visualization</p>
+            <div class="variableView slate flex sb">
+                <div class="variableViewColum" id="customVariables">
+                    <h2>Variables:</h2>
+
+                </div>
+                <div class="variableViewColum stateVariableView" id="stateVariables">
+                    <h2>Cobot state:</h2>
+                    <div class="dropdown">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuClickableInside" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+                            Select state variables
+                        </button>
+                        <ul class="dropdown-menu" id="stateVariableSelection" aria-labelledby="dropdownMenuClickableInside">
+                            <li>
+                                <div class="form-check dropdown-item">
+                                    <input class="form-check-input" type="checkbox" id="stateVariableCheckbox" disabled>
+                                    <label class="form-check-label" for="stateVariableCheckbox">Needs to get a state from the robot</label>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <div id="stateVariablePopup" class="hidden">
+                    </div>
+                    <div id="stateVariableDisplay">
+
+                    </div>
+                </div>
             </div>
         </div>
     </div>

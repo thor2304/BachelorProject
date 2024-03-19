@@ -1,9 +1,11 @@
-import {createCommandMessage, parseMessage} from "./messageHandling/messageFactory";
-import {Message, MessageType} from "./messageHandling/messageDefinitions";
-import {handleAckResponseMessage} from "./messageHandling/AckResponseHandler";
-import {handleFeedbackMessage} from "./messageHandling/FeedbackMessageHandler";
-import {handleRobotStateMessage} from "./messageHandling/RobotStateMessageHandler";
+import {parseMessage} from "./responseMessages/responseMessageParsing";
+import {ResponseMessage, ResponseMessageType} from "./responseMessages/responseMessageDefinitions";
+import {handleAckResponseMessage} from "./responseMessages/AckResponseHandler";
+import {handleFeedbackMessage} from "./responseMessages/FeedbackMessageHandler";
+import {handleRobotStateMessage} from "./responseMessages/RobotStateMessageHandler";
 import {EventList} from "./interaction/EventList";
+import {createCommandMessage, createUndoMessage} from "./userMessages/userMessageFactory";
+import {UserMessage} from "./userMessages/userMessageDefinitions";
 
 function get_socket(ip: string, port: number) {
     const out = new WebSocket(
@@ -20,19 +22,22 @@ function get_socket(ip: string, port: number) {
     return out
 }
 
-function handleMessageFromProxyServer(message: Message) {
+function handleMessageFromProxyServer(message: ResponseMessage) {
     switch (message.type) {
-        case MessageType.AckResponse:
+        case ResponseMessageType.AckResponse:
             handleAckResponseMessage(message);
             break;
-        case MessageType.Feedback:
+        case ResponseMessageType.Feedback:
             handleFeedbackMessage(message);
             break;
-        case MessageType.RobotState:
+        case ResponseMessageType.RobotState:
             handleRobotStateMessage(message);
             break;
-        case MessageType.CommandFinished:
+        case ResponseMessageType.CommandFinished:
             console.log('Command finished: ', message);
+            break;
+        case ResponseMessageType.UndoResponse:
+            console.log('Undo response: ', message);
             break;
         default:
             console.warn('invalid message type: ', message);
@@ -42,23 +47,16 @@ function handleMessageFromProxyServer(message: Message) {
 /**
  *
  * @param socket {WebSocket}
- * @param data {string}
- * @param id {number}
+ * @param message {UserMessage}
  */
-function send(socket: WebSocket, data: string, id: number) {
+function send(socket: WebSocket, message: UserMessage) {
     if (socket.readyState === WebSocket.CLOSED) {
         console.log('socket closed');
         return;
     }
-    if (!data.endsWith('\n')) {
-        data += '\n';
-    }
 
-    const commandMessage = createCommandMessage(id, data);
-
-    console.log('sending command: ' + JSON.stringify(commandMessage));
-
-    socket.send(JSON.stringify(commandMessage));
+    console.log('sending command: ' + JSON.stringify(message));
+    socket.send(JSON.stringify(message));
 }
 
 async function testCommands() {
@@ -68,8 +66,13 @@ async function testCommands() {
     proxyServer.onopen = () => {
         console.log('proxy server opened');
         document.addEventListener(EventList.CommandEntered, function (e: CustomEvent) {
-            send(proxyServer, e.detail.text, e.detail.id)
-        })
+            const commandMessage = createCommandMessage(e.detail.id, e.detail.text);
+            send(proxyServer, commandMessage)
+        });
+        document.addEventListener(EventList.UndoEvent, function (e: CustomEvent) {
+            const undoCommand = createUndoMessage(e.detail.id);
+            send(proxyServer, undoCommand);
+        });
     };
 
     rtdeServer.onopen = () => {
