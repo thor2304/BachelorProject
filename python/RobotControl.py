@@ -83,69 +83,9 @@ def prepare_interpreter_session(interpreter_socket: Socket):
     send_command("__test2__ = \"f\"", interpreter_socket)
 
 
-def get_rtde_socket():
-    return get_socket(POLYSCOPE_IP, 30004)
-
-
-def receive_input_commands(interpreter_socket: Socket):
-    for i in range(30):
-        # print(my_socket.recv(2048))
-        action = input('Action?\n')
-        send_command(action, interpreter_socket)
-
-
-def send_test_commands(interpreter_socket: Socket):
-    send_wrapped_command("set_digital_out(0, False)\n", interpreter_socket)
-
-    send_command("set_digital_out(1, False)\n", interpreter_socket)
-    send_command("set_digital_out(2, False)\n", interpreter_socket)
-
-    send_command("b=0\n", interpreter_socket)
-
-    send_command("set_digital_out(b, True)\n", interpreter_socket)
-
-    function_def: str = (
-        "def test():\n"
-        "a = True\n"
-        "set_digital_out(2, a)\n"
-        "set_digital_out(1, True)\n"
-        "end\n"
-        "test()\n"
-    )
-
-    # send_command(function_def, my_socket)
-
-    function_def_no_new_line = (
-        "def test():"
-        " out = "
-        " set_digital_out(2, a)                                                      "
-        " set_digital_out(1, True) "
-        " end "
-        " test()\n"
-    )
-    send_command(function_def_no_new_line, interpreter_socket)
-
-    function_connect_to_socket = (
-        'socket_open("proxy","8000")\n'
-        'def send(id):'
-        'out = "{\\"type\\": \\"Command\\", \\"data\\": {\\"id\\": " + id + ", \\"var1\\": " + var1 + "}}"'
-        'socket_send_string(out)'
-        'end'
-        'thread sending():'
-        'while True:'
-        'send(10)'
-        'end'
-        'end'
-    )
-
-    send_command("test()\n", interpreter_socket)
-
-    send_command('popup("post","post")', interpreter_socket)
-
-
 def sanitize_command(command: str) -> str:
     command = command.replace('\n', ' ')
-    command += "\n" # Add a trailing \n character
+    command += "\n"  # Add a trailing \n character
     return command
 
 
@@ -178,17 +118,19 @@ def send_user_command(command: CommandMessage, on_socket: Socket) -> str:
     string_command = finish_command.dump_ur_string()
     print(f"String command: {string_command}")
     wrapping = URIFY_return_string(string_command)
-    command_message += wrapping
 
-    extra_len = len(wrapping) + 1  # the 1 is to remove the trailing \n character
+    test_history(command)
+    response = send_command(command_message, on_socket)
+    send_command(wrapping, on_socket)
 
+    return response[:-2]  # Removes \n from the end of the response
+
+
+def test_history(command):
     history = History()
     history.new_command(command)
     history.active_command_state().append_state(State())
     history.debug_print()
-    response = send_command(command_message, on_socket)
-
-    return response[0:-extra_len]
 
 
 def URIFY_return_string(string_to_urify: str) -> str:

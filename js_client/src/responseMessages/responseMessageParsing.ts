@@ -8,6 +8,7 @@ import {
 } from "./responseMessageDefinitions";
 
 export function parseMessage(message: string): ResponseMessage {
+    console.log("Parsing message: ", message)
     const parsed = JSON.parse(message);
 
     switch (parsed.type) {

@@ -1,31 +1,28 @@
 import asyncio
-from asyncio import StreamReader, StreamWriter
+from asyncio import StreamReader, StreamWriter, Task
 from socket import gethostbyname, gethostname
 from socket import socket as Socket
 from time import sleep
 from typing import Final
 
 from websockets.server import serve
-from socket import socket as Socket
-from socket import gethostbyname, gethostname
-from SocketMessages import AckResponse, parse_message, CommandMessage, UndoMessage, UndoResponseMessage, \
-    UndoStatus
-from RobotControl import send_command, get_interpreter_socket, send_wrapped_command, read_from_socket
-from typing import Final
 
-from RobotControl import send_command, get_interpreter_socket, send_user_command, read_from_socket
-from RtdeConnection import start_rtde_server
-from SocketMessages import parse_command_message, AckResponse
+from RobotControl import send_command, get_interpreter_socket, read_from_socket, send_user_command
+from SocketMessages import AckResponse
+from SocketMessages import parse_message, CommandMessage, UndoMessage, UndoResponseMessage, \
+    UndoStatus
 
 clients = dict()
 _START_BYTE: Final = b'\x02'
 _END_BYTE: Final = b'\x03'
 _EMPTY_BYTE: Final = b''
 
+_connected_web_clients = set()
+
 
 def handle_command_message(message: CommandMessage, socket: Socket) -> str:
     command_string = message.data.command
-    result = send_wrapped_command(message, socket)
+    result = send_user_command(message, socket)
     response = AckResponse(message.data.id, command_string, result)
     str_response = str(response)
     print(f"Sending response: {str_response}")
@@ -40,6 +37,7 @@ def handle_undo_message(message: UndoMessage) -> str:
 
 def get_handler(socket: Socket) -> callable:
     async def echo(websocket):
+        _connected_web_clients.add(websocket)
         async for message in websocket:
             print(f"Received message: {message}")
 
@@ -58,6 +56,14 @@ def get_handler(socket: Socket) -> callable:
             await websocket.send(str_response)
 
     return echo
+
+
+def send_to_all_web_clients(message: str):
+    for websocket in _connected_web_clients:
+        if websocket.closed:
+            _connected_web_clients.remove(websocket)
+            continue
+        asyncio.create_task(websocket.send(message))
 
 
 async def open_robot_server():
@@ -84,10 +90,10 @@ def client_connected_cb(client_reader: StreamReader, client_writer: StreamWriter
 
     print('Client connected: {}'.format(client_id))
 
-    # Define the clean up function here
-    def client_cleanup(fu):
+    # Define the cleanup function here
+    def client_cleanup(fu: Task[None]):
         print('Cleaning up client {}'.format(client_id))
-        try:  # Retrievre the result and ignore whatever returned, since it's just cleaning
+        try:  # Retrieve the result and ignore whatever returned, since it's just cleaning
             fu.result()
         except Exception as e:
             pass
@@ -116,7 +122,7 @@ async def client_task(reader: StreamReader, writer: StreamWriter):
             data = extra_data + data
             extra_data = []
 
-        # Check if the data recieved starts with the start byte
+        # Check if the data received starts with the start byte
         # When using _START_BYTE[0] we return the integer value of the byte in the ascii table, so here it returns 2
         if data[0] != _START_BYTE[0]:
             print(f"Something is WRONG. Data not started with start byte: {data}")
@@ -133,13 +139,14 @@ async def client_task(reader: StreamReader, writer: StreamWriter):
 
             for message in list_of_data:
                 if message:
+                    message = message[1:]  # remove the start byte
                     message_from_robot_received(message)
 
 
 def message_from_robot_received(message: bytes):
     decoded_message = message.decode()
     print(f"Message from robot: {decoded_message}")
-
+    send_to_all_web_clients(decoded_message)
 
 
 async def start_webserver():

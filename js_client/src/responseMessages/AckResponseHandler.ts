@@ -37,6 +37,4 @@ export function handleAckResponseMessage(message: ResponseMessage): void {
     responseWrapper.appendChild(responseParagraph);
 
     console.log(message);
-    
-    emitCommandFinishedEvent(message) // For testing purposes. Must be removed later!!
 }

@@ -6,8 +6,9 @@ export function handleCommandFinishedMessage(message: ResponseMessage): void {
         console.log('not a Command_finished message: ', message);
         return;
     }
+    console.log('Command finished: ', message);
 
-    throw new Error('Command_finished message handler not implemented');
+    emitCommandFinishedEvent(message);
 }
 
 export function emitCommandFinishedEvent(message: ResponseMessage): void {

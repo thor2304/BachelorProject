@@ -28,7 +28,7 @@ class VariableObject:
         self.value = value
 
     def dump(self, ur_prep=False):
-        value = self.value if not ur_prep else f'\"\"{self.variable_type.value}{self.value}\"\"'
+        value = self.value if not ur_prep else f'\"\"{self.variable_type.value}{self.name}\"\"'
         return {
             "name": self.name,
             "type": self.variable_type.name,

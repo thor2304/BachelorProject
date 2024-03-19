@@ -6,6 +6,7 @@ import {handleRobotStateMessage} from "./responseMessages/RobotStateMessageHandl
 import {EventList} from "./interaction/EventList";
 import {createCommandMessage, createUndoMessage} from "./userMessages/userMessageFactory";
 import {UserMessage} from "./userMessages/userMessageDefinitions";
+import {handleCommandFinishedMessage} from "./responseMessages/MessageFinishedHandler";
 
 function get_socket(ip: string, port: number) {
     const out = new WebSocket(
@@ -34,7 +35,7 @@ function handleMessageFromProxyServer(message: ResponseMessage) {
             handleRobotStateMessage(message);
             break;
         case ResponseMessageType.CommandFinished:
-            console.log('Command finished: ', message);
+            handleCommandFinishedMessage(message);
             break;
         case ResponseMessageType.UndoResponse:
             console.log('Undo response: ', message);
