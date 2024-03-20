@@ -34,7 +34,7 @@ def create_get_socket_function() -> Callable[[str, int], Socket]:
             sleep(1)
             return get_socket(ip, port)
 
-        my_socket.setblocking(False)
+        # my_socket.setblocking(False)
         inner_socket_bank[(ip, port)] = my_socket
         return my_socket
 

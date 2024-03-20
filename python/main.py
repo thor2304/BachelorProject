@@ -2,6 +2,7 @@ import asyncio
 
 from RtdeConnection import start_rtde_loop, start_RTDE_websocket
 from WebsocketProxy import open_robot_server, start_webserver
+from PopupReader import start_primary_reader
 
 
 async def main():
@@ -11,6 +12,7 @@ async def main():
         t2 = tg.create_task(start_webserver())
         t3 = tg.create_task(start_rtde_loop())
         t4 = tg.create_task(start_RTDE_websocket())
+        t5 = tg.create_task(start_primary_reader())
     pass
 
 
