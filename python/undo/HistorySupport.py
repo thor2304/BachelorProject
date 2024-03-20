@@ -6,6 +6,9 @@ from undo.VariableRegistry import VariableRegistry
 
 _variable_registry = VariableRegistry()
 
+READ_FREQUENCY_HZ = 1
+READ_PERIOD = 1 / READ_FREQUENCY_HZ
+
 
 def read_variable_state():
     interpreter_socket = get_interpreter_socket()
@@ -17,4 +20,4 @@ def read_variable_state():
 async def start_read_loop():
     while True:
         read_variable_state()
-        await asyncio.sleep(1)
+        await asyncio.sleep(READ_PERIOD)

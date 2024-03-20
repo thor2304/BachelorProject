@@ -1,6 +1,8 @@
 import json
 from enum import Enum, auto
 
+from URIFY import URIFY_return_string
+
 
 class RobotSocketMessageTypes(Enum):
     Command_finished = auto()
@@ -28,6 +30,8 @@ class VariableObject:
         self.value = value
 
     def dump(self, ur_prep=False):
+        # TODO: Make another dump method that can be used by the ReportState object to run the read command saved in
+        #  self.value
         value = self.value if not ur_prep else f'\"\"{self.variable_type.value}{self.name}\"\"'
         return {
             "name": self.name,
@@ -92,4 +96,4 @@ class ReportState:
         }
 
     def dump_ur_string(self):
-        return json.dumps(self.dump())
+        return URIFY_return_string(json.dumps(self.dump()))
