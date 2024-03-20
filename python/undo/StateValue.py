@@ -11,3 +11,8 @@ class StateValue:
 
     def __str__(self):
         return f"{self.variable}: {self.value}"
+
+    def __eq__(self, other):
+        if not isinstance(other, StateValue):
+            return False
+        return self.value == other.value and self.variable == other.variable

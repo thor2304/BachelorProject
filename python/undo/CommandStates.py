@@ -6,26 +6,23 @@ class CommandStates:
     def __init__(self, command: CommandMessage):
         self.user_command = command
         self.states: list[State] = []
-        self.collapsed = False
-        self.collapsed_states: list[State] = []
+        self.is_closed = False
 
     def append_state(self, state: State):
-        self.states.append(state)
+        if self.is_closed and self.states[-1] != state:
+            raise ValueError("The states differ after the command has been closed.")
+        from_state = self.states[-1]
+        if from_state.has_un_collapsible_difference(state):
+            self.states.append(state)
+        else:
+            self.states[-1] = state
 
-    def collapse(self) -> None:
-        self.collapsed = True
-        from_state = self.states[0]
-        self.collapsed_states = [from_state]
-        for to_state in self.states[1:]:
-            if from_state.has_un_collapsible_difference(to_state):
-                self.collapsed_states.append(to_state)
-                from_state = to_state
+    def close(self):
+        self.is_closed = True
 
     def get_undo_commands(self) -> str:
-        if not self.collapsed:
-            self.collapse()
         output = ""
-        for state in reversed(self.collapsed_states):
+        for state in reversed(self.states):
             output += state.get_apply_commands()
         return output
 
@@ -33,7 +30,7 @@ class CommandStates:
         states = []
         if self.states is None:
             states = "None"
-        return f"User Command: {self.user_command}, States: {states}, Collapsed: {self.collapsed}"
+        return f"User Command: {self.user_command}, States: {states}"
 
     def __repr__(self):
         return self.__str__()

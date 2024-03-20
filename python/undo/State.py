@@ -22,9 +22,23 @@ class State:
 
     def has_un_collapsible_difference(self, other: Self) -> bool:
         # Sort variables by name or reference to their StateVariable
+        if len(self.state) != len(other.state):
+            return True
         for self_state, other_state in zip(self.state, other.state):
             if self_state.variable.is_collapsible:
                 continue
             if self_state.value != other_state.value:
                 return True
         return False
+
+    def __eq__(self, other: Self) -> bool:
+        match other:
+            case State(other_state):
+                if len(self.state) != len(other_state):
+                    return False
+                for self_state, other_state in zip(self.state, other_state):
+                    if self_state != other_state:
+                        return False
+                return True
+            case _:
+                return False
