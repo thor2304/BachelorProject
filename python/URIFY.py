@@ -1,4 +1,4 @@
-from RobotSocketMessages import VariableTypes
+from RobotSocketVariableTypes import VariableTypes
 
 
 def URIFY_return_string(string_to_urify: str) -> str:

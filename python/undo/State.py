@@ -25,7 +25,7 @@ class State:
         if len(self.state) != len(other.state):
             return True
         for self_state, other_state in zip(self.state, other.state):
-            if self_state.variable.is_collapsible:
+            if self_state.variable_definition.is_collapsible:
                 continue
             if self_state.value != other_state.value:
                 return True

@@ -1,25 +1,13 @@
 import json
 from enum import Enum, auto
 
+from RobotSocketVariableTypes import VariableTypes
 from URIFY import URIFY_return_string
 
 
 class RobotSocketMessageTypes(Enum):
     Command_finished = auto()
     Report_state = auto()
-
-
-class VariableTypes(Enum):
-    """
-    This is a list of variable types that can be sent to the robot
-    Each type has a corresponding character that is used to identify the type
-    """
-    String = "<"
-    Integer = "|"
-    Float = "@"
-    Boolean = "£"
-    List = "?"
-    Pose = "!"
 
 
 class VariableObject:

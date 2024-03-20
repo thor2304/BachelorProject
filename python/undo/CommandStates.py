@@ -11,6 +11,11 @@ class CommandStates:
     def append_state(self, state: State):
         if self.is_closed and self.states[-1] != state:
             raise ValueError("The states differ after the command has been closed.")
+
+        if len(self.states) == 0:
+            self.states.append(state)
+            return
+
         from_state = self.states[-1]
         if from_state.has_un_collapsible_difference(state):
             self.states.append(state)
