@@ -5,10 +5,7 @@ from undo.CommandStates import CommandStates
 
 
 class History(object):
-    def __new__(cls):
-        if not hasattr(cls, '_instance'):
-            cls._instance = super(History, cls).__new__(cls)
-        return cls._instance
+    _instance: Self | None = None
 
     def __init__(self):
         self.command_state_history: dict[int, CommandStates] = {}
@@ -28,9 +25,16 @@ class History(object):
                              f"The highest id is {self.highest_id} and the provided id is {command.get_id()}"
                              f"The command with that id is"
                              f" {self.command_state_history[self.highest_id].user_command.data.command}")
+        print(f"New command added to history: {command.get_id()} length: {len(self.command_state_history)}")
 
     def debug_print(self) -> None:
-        debug_string = "History: \n"
+        debug_string = f"History: length={len(self.command_state_history)}\n"
         for key, value in self.command_state_history.items():
             debug_string += f"\tKey: {key}, Value: {value}\n"
         print(debug_string)
+
+    @classmethod
+    def get_history(cls):
+        if cls._instance is None:
+            cls._instance = cls()
+        return cls._instance

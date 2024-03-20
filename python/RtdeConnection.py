@@ -23,12 +23,15 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 import asyncio
 import sys
+from typing import Callable, Coroutine
 
 from rtde import rtde_config, rtde
 from rtde.serialize import DataObject
 from websockets.server import serve, WebSocketServerProtocol
 from SocketMessages import RobotState
 from RobotControl import POLYSCOPE_IP
+from undo.History import History
+from undo.State import State
 
 ROBOT_HOST = POLYSCOPE_IP
 ROBOT_PORT = 30004
@@ -44,6 +47,9 @@ TRANSMIT_FREQUENCY_IN_HERTZ = 60
 SLEEP_TIME = 1 / TRANSMIT_FREQUENCY_IN_HERTZ
 
 _ROBOT_STATE: DataObject | None = None
+
+type ListenerFunction = Callable[[DataObject], Coroutine[None, None, None]]
+listeners: list[ListenerFunction] = []
 
 
 async def start_rtde_loop():
@@ -71,23 +77,24 @@ def states_are_equal(obj1: DataObject, obj2: DataObject):
     return obj1.__dict__ == obj2.__dict__
 
 
-async def send_state_through_websocket(websocket: WebSocketServerProtocol, state: DataObject):
-    if state is None:
-        return
-    await websocket.send(str(RobotState(state)))
-
-
 def get_handler() -> callable:
     async def handler(websocket: WebSocketServerProtocol):
         # Connecting to RTDE interface
         local_robot_state: DataObject | None = None
+
+        async def send_state_through_websocket(state: DataObject):
+            if state is None:
+                return
+            await websocket.send(str(RobotState(state)))
+
+        register_listener(send_state_through_websocket)
 
         while True:
             await asyncio.sleep(SLEEP_TIME)
 
             if local_robot_state is None and _ROBOT_STATE is not None:
                 local_robot_state = _ROBOT_STATE
-                await send_state_through_websocket(websocket, _ROBOT_STATE)
+                await call_listeners(_ROBOT_STATE)
                 continue
 
             if local_robot_state is None and _ROBOT_STATE is None:
@@ -97,9 +104,23 @@ def get_handler() -> callable:
                 continue
 
             local_robot_state = _ROBOT_STATE
-            await send_state_through_websocket(websocket, _ROBOT_STATE)
+            await call_listeners(_ROBOT_STATE)
 
     return handler
+
+
+def register_listener(listener: ListenerFunction):
+    listeners.append(listener)
+
+
+async def log_state(state: DataObject):
+    history = History.get_history()
+    history.active_command_state().append_state(State(state))
+
+
+async def call_listeners(with_state: DataObject):
+    for listener in listeners:
+        await listener(with_state)
 
 
 async def start_RTDE_websocket():
