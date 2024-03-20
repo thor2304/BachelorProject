@@ -71,6 +71,21 @@ class CommandMessage:
         self.type = MessageType.Command
         self.data: CommandMessageData = CommandMessageData(id, command)
 
+    def get_id(self):
+        return self.data.id
+
+    def __str__(self):
+        return json.dumps({
+            "type": self.type.name,
+            "data": {
+                "id": self.data.id,
+                "command": self.data.command
+            }
+        })
+
+    def __repr__(self):
+        return self.__str__()
+
 
 class UndoMessage:
     def __init__(self, id: int):
