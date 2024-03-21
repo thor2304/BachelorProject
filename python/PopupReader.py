@@ -14,23 +14,26 @@ async def start_primary_reader():
     print(f"Starting primary reader")
 
     while True:
+        await asyncio.sleep(0.1)
         data = primary_socket.recv(4096*4)
         if data:
             i = 0
 
-            # extract packet length, timestamp and packet type from start of packet and print to screen
+            # extract packet length and packet type from start of packet and print to screen
             (length, type_) = struct.unpack(packageHeaderFmt, data[i:i + 5])
             assert i + length <= len(data), '{}+{}<={}'.format(i, length, len(data))
-            print(f"Received from primary socket with length {length} and type {type_}")
+            lengths_not_to_print = [716, 22, 9]
+            if length not in lengths_not_to_print:
+                print(f"Received Robot Message with length {length} and type {type_}")
 
-            if type_ == 16:
-                print(f"Received Robot State Package with length {length}")
-            elif type_ == 20:
+            if type_ == 20:
+                print(f"***********************")
                 print(f"Received Robot Message with length {length}")
                 timestamp = (struct.unpack('!Q', data[5:13]))[0]
                 source = (struct.unpack('!b', data[13:14]))[0]
-                robotMessageType = (struct.unpack('!b', data[14:15]))[0]
-                print(f"Timestamp: {timestamp}, Source: {source}, RobotMessageType: {robotMessageType}")
+                robot_message_type = (struct.unpack('!b', data[14:15]))[0]
+                print(f"Timestamp: {timestamp}, Source: {source}, RobotMessageType: {robot_message_type}")
+                print(f"***********************")
 
             # print(f"Received data: {my_data}")
             # print(f"Lenght: {length}, Type: {type_}, Data: {my_data}")
@@ -76,7 +79,7 @@ async def start_primary_reader():
 
 
 
-        await asyncio.sleep(1)
+        # await asyncio.sleep(1)
 
 
 
