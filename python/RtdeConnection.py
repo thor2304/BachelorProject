@@ -28,7 +28,7 @@ from rtde import rtde_config, rtde
 from rtde.serialize import DataObject
 from SocketMessages import RobotState
 from RobotControl import POLYSCOPE_IP
-from python.WebsocketProxy import send_to_all_web_clients
+from WebsocketProxy import send_to_all_web_clients
 
 ROBOT_HOST = POLYSCOPE_IP
 ROBOT_PORT = 30004
@@ -55,13 +55,13 @@ async def start_rtde_loop():
     previous_state = None
 
     while True:
-        await asyncio.sleep(SLEEP_TIME)
         try:
             new_state = con.receive()
             check_if_state_is_new(new_state, previous_state)
             previous_state = new_state
         except rtde.RTDEException as e:
             print(f"Error in recieve_rtde_data: {e}")
+        await asyncio.sleep(SLEEP_TIME)
 
 
 def states_are_equal(obj1: DataObject, obj2: DataObject):
