@@ -62,7 +62,6 @@ function send(socket: WebSocket, message: UserMessage) {
 
 async function testCommands() {
     const proxyServer = get_socket("localhost", 8767);
-    const rtdeServer = get_socket("localhost", 8001);
 
     proxyServer.onopen = () => {
         console.log('proxy server opened');
@@ -74,10 +73,6 @@ async function testCommands() {
             const undoCommand = createUndoMessage(e.detail.id);
             send(proxyServer, undoCommand);
         });
-    };
-
-    rtdeServer.onopen = () => {
-        console.log('RTDE socket opened');
     };
 }
 
