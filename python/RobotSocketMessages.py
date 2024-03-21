@@ -18,9 +18,15 @@ class VariableObject:
         self.value = value
 
     def dump(self, ur_prep=False):
-        # TODO: Make another dump method that can be used by the ReportState object to run the read command saved in
-        #  self.value
         value = self.value if not ur_prep else f'\"\"{self.variable_type.value}{self.name}\"\"'
+        return {
+            "name": self.name,
+            "type": self.variable_type.name,
+            "value": value
+        }
+
+    def dump_ur_string_for_report_state(self):
+        value = f'\"\"{self.variable_type.value}{self.value}\"\"'
         return {
             "name": self.name,
             "type": self.variable_type.name,
@@ -80,8 +86,51 @@ class ReportState:
     def dump(self):
         return {
             "type": self.type.name,
-            "data": [variable.dump(True) for variable in self.variables]
+            "data": [variable.dump_ur_string_for_report_state() for variable in self.variables]
         }
 
-    def dump_ur_string(self):
-        return URIFY_return_string(json.dumps(self.dump()))
+    def dump_string_pre_urify(self):
+        return json.dumps(self.dump())
+
+    def dump_string_post_urify(self):
+        return URIFY_return_string(self.dump_string_pre_urify())
+
+
+def parse_list_to_variable_objects(variable_list: list[dict]) -> list[VariableObject]:
+    out: list[VariableObject] = list()
+    for variable in variable_list:
+        match variable:
+            case {
+                'name': name,
+                'type': variable_type,
+                'value': value
+            }:
+                out.append(VariableObject(name, VariableTypes[variable_type], value))
+            case _:
+                raise ValueError(f"Unknown VariableObject type: {variable}")
+    return out
+
+
+def parse_robot_message(message: str) -> CommandFinished | ReportState:
+    parsed = json.loads(message)
+
+    match parsed:
+        case {
+            'type': RobotSocketMessageTypes.Report_state.name,
+            'variables': variable_list
+        }:
+            parsed_variable_list = parse_list_to_variable_objects(variable_list)
+            return ReportState(parsed_variable_list)
+        case {
+            'type': RobotSocketMessageTypes.Command_finished.name,
+            'data': {
+                'id': id,
+                'command': command,
+                'variables': variable_list
+            }
+        }:
+            parsed_variable_list = parse_list_to_variable_objects(variable_list)
+            return CommandFinished(id, command, tuple(parsed_variable_list))
+        case _:
+            raise ValueError(f"Unknown RobotSocketMessage type: {parsed}")
+
