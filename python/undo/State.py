@@ -8,7 +8,7 @@ class State:
         self.state = state
 
     def __str__(self):
-        return self.state
+        return str(self.state) if len(self.state) > 0 else "Empty State"
 
     def __repr__(self):
         return self.__str__()

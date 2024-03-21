@@ -116,5 +116,17 @@ inputField.addEventListener('keydown', function (e: KeyboardEvent): void {
         case 'ArrowDown':
             handleArrowPresses(this, e, targetDirection.down);
             break;
+        case "1":
+            if (e.ctrlKey) {
+                e.preventDefault();
+                sendCommand("movej([0, -1.57, 1.57, 0, 1.57, 0], a=1.0, v=1)");
+            }
+            break;
+        case "2":
+            if (e.ctrlKey) {
+                e.preventDefault();
+                sendCommand("movej([1.57, 0, 0, 1, 0, 1], a=1.0, v=1)");
+            }
+            break;
     }
 })

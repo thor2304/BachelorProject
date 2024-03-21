@@ -45,7 +45,7 @@ def register_all_rtde_variables(in_registry: VariableRegistry):
         RtdeStateVariable("safety status", "safety_status"),
         RtdeStateVariable("runtime state", "runtime_state"),
         RtdeStateVariable("robot mode", "robot_mode"),
-        RtdeStateVariable("joints", "joints"),
+        RtdeStateVariable("joints", "joints", False),
         RtdeStateVariable("tcp", "tcp"),
         RtdeStateVariable("payload", "payload"),
     ]

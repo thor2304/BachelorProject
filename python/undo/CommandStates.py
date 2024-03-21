@@ -32,10 +32,14 @@ class CommandStates:
         return output
 
     def __str__(self):
-        states = []
         if self.states is None:
             states = "None"
-        return f"User Command: {self.user_command}, States: {states}"
+        elif len(self.states) == 0:
+            states = "Empty"
+        else:
+            states = len(self.states)
+
+        return f"User Command: {self.user_command}, number of states: {states}"
 
     def __repr__(self):
         return self.__str__()
