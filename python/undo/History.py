@@ -2,6 +2,7 @@ from typing import Self
 
 from SocketMessages import CommandMessage
 from undo.CommandStates import CommandStates
+from undo.State import State
 
 
 class History(object):
@@ -9,22 +10,27 @@ class History(object):
 
     def __init__(self):
         self.command_state_history: dict[int, CommandStates] = {}
-        self.highest_id = 0
+        self.active_command_state: CommandStates | None = None
 
-    def active_command_state(self) -> CommandStates:
-        return self.command_state_history[self.get_highest_id()]
+    def get_active_command_state(self) -> CommandStates:
+        return self.active_command_state
 
-    def get_highest_id(self) -> int:
-        return self.highest_id
+    def append_state(self, state: State) -> None:
+        if self.active_command_state is None:
+            print("There is no active command state.")
+            return
+            # raise ValueError("There is no active command state.")
+        self.active_command_state.append_state(state)
 
     def new_command(self, command: CommandMessage) -> None:
         self.command_state_history[command.get_id()] = CommandStates(command)
-        self.highest_id = max(self.command_state_history.keys())
-        if self.highest_id != command.get_id():
+        max_id = max(self.command_state_history.keys())
+        if max_id != command.get_id():
             raise ValueError(f"The provided command does not have the highest id."
-                             f"The highest id is {self.highest_id} and the provided id is {command.get_id()}"
+                             f"The highest id is {max_id} and the provided id is {command.get_id()}"
                              f"The command with that id is"
-                             f" {self.command_state_history[self.highest_id].user_command.data.command}")
+                             f" {self.command_state_history[max_id].user_command.data.command}")
+        self.active_command_state = self.command_state_history[command.get_id()]
         print(f"New command added to history: {command.get_id()} length: {len(self.command_state_history)}")
 
     def debug_print(self) -> None:

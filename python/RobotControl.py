@@ -93,7 +93,7 @@ def sanitize_command(command: str) -> str:
 def send_command(command: str, on_socket: Socket) -> str:
     """Returns the ack_response from the robot. The ack_response is a string."""
     command = sanitize_command(command)
-    print(f"Sending the following command: '{escape_string(command)}'")
+    # print(f"Sending the following command: '{escape_string(command)}'")
     on_socket.send(command.encode())
     result = read_from_socket(on_socket)
     out = ""
@@ -117,7 +117,7 @@ def send_user_command(command: CommandMessage, on_socket: Socket) -> str:
     command_message = command.data.command
     finish_command = CommandFinished(command.data.id, command_message, tuple(list_of_variables))
     string_command = finish_command.dump_ur_string()
-    print(f"String command: {string_command}")
+    # print(f"String command: {string_command}")
     wrapping = URIFY_return_string(string_command)
 
     test_history(command)
@@ -130,7 +130,7 @@ def send_user_command(command: CommandMessage, on_socket: Socket) -> str:
 def test_history(command):
     history = History.get_history()
     history.new_command(command)
-    history.active_command_state().append_state(State())
+    # history.append_state(State())
     history.debug_print()
 
 

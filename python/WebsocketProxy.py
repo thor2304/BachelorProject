@@ -39,14 +39,14 @@ def get_handler(socket: Socket) -> callable:
     async def echo(websocket):
         _connected_web_clients.add(websocket)
         async for message in websocket:
-            print(f"Received message: {message}")
+            # print(f"Received message: {message}")
 
             message = parse_message(message)
 
             match message:
                 case CommandMessage():
                     str_response = handle_command_message(message, socket)
-                    print(f"Message is a CommandMessage")
+                    # print(f"Message is a CommandMessage")
                 case UndoMessage():
                     str_response = handle_undo_message(message)
                     print(f"Message is an UndoMessage")
@@ -145,7 +145,7 @@ async def client_task(reader: StreamReader, writer: StreamWriter):
 
 def message_from_robot_received(message: bytes):
     decoded_message = message.decode()
-    print(f"Message from robot: {decoded_message}")
+    # print(f"Message from robot: {decoded_message}")
     send_to_all_web_clients(decoded_message)
 
 

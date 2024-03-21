@@ -25,3 +25,30 @@ class VariableRegistry:
 
     def get_code_variables(self) -> list[CodeStateVariable]:
         return self._code_variables
+
+    def get_rtde_variables(self) -> list[RtdeStateVariable]:
+        return self._rtde_variables
+
+
+def register_all_code_variables(in_registry: VariableRegistry):
+    variables = [
+        CodeStateVariable("test", "test"),
+        CodeStateVariable("test2", "test2")
+    ]
+
+    for variable in variables:
+        in_registry.register_code_variable(variable)
+
+
+def register_all_rtde_variables(in_registry: VariableRegistry):
+    variables = [
+        RtdeStateVariable("safety status", "safety_status"),
+        RtdeStateVariable("runtime state", "runtime_state"),
+        RtdeStateVariable("robot mode", "robot_mode"),
+        RtdeStateVariable("joints", "joints"),
+        RtdeStateVariable("tcp", "tcp"),
+        RtdeStateVariable("payload", "payload"),
+    ]
+
+    for variable in variables:
+        in_registry.register_rtde_variable(variable)

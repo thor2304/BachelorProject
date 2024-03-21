@@ -28,10 +28,11 @@ from typing import Callable, Coroutine
 from rtde import rtde_config, rtde
 from rtde.serialize import DataObject
 from websockets.server import serve, WebSocketServerProtocol
-from SocketMessages import RobotState
+
 from RobotControl import POLYSCOPE_IP
+from SocketMessages import RobotState
 from undo.History import History
-from undo.State import State
+from undo.HistorySupport import create_state_from_rtde_state
 
 ROBOT_HOST = POLYSCOPE_IP
 ROBOT_PORT = 30004
@@ -115,7 +116,10 @@ def register_listener(listener: ListenerFunction):
 
 async def log_state(state: DataObject):
     history = History.get_history()
-    history.active_command_state().append_state(State(state))
+    history.append_state(create_state_from_rtde_state(state))
+
+
+register_listener(log_state)
 
 
 async def call_listeners(with_state: DataObject):

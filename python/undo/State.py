@@ -21,6 +21,10 @@ class State:
         return output
 
     def has_un_collapsible_difference(self, other: Self) -> bool:
+        if self.state is None:
+            print("self.state is None")
+            return False
+
         # Sort variables by name or reference to their StateVariable
         if len(self.state) != len(other.state):
             return True

@@ -327,6 +327,7 @@ class RobotStateData:
         self.payload: float = payload
 
     def dump(self):
+        """Dumps the data to a dictionary that can be converted to JSON."""
         return {
             "safety_status": self.safety_status.name,
             "runtime_state": self.runtime_state.name,
@@ -452,7 +453,7 @@ def ensure_type_of_payload(payload: any) -> float:
 
 def parse_message(message: str) -> CommandMessage | UndoMessage:
     parsed = json.loads(message)
-    print(f"parsed: {parsed}")
+    # print(f"parsed: {parsed}")
 
     match parsed:
         case {

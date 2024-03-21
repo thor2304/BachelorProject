@@ -9,6 +9,8 @@ def escape_string(string: str) -> str:
     return out
 
 
-def time_print(string: str):
+def time_print(string: str, ignore=True):
+    if ignore:
+        return
     time = perf_counter_ns()
     print(f"{time}: {string}")
