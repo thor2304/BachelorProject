@@ -11,7 +11,7 @@ from RobotControl import send_command, get_interpreter_socket, read_from_socket,
 from SocketMessages import AckResponse, RobotState
 from SocketMessages import parse_message, CommandMessage, UndoMessage, UndoResponseMessage, \
     UndoStatus
-from RobotSocketMessages import parse_robot_message, CommandFinished
+from RobotSocketMessages import parse_robot_message, CommandFinished, ReportState
 
 clients = dict()
 _START_BYTE: Final = b'\x02'
@@ -148,12 +148,14 @@ def message_from_robot_received(message: bytes):
     decoded_message = message.decode()
     print(f"Message from robot: {decoded_message}")
     robot_message = parse_robot_message(decoded_message)
-    if robot_message is type(CommandFinished):
-        print(f"Command finished: {robot_message}")
-    elif robot_message is type(RobotState):
-        print(f"Report state: {robot_message}")
-
-    send_to_all_web_clients(decoded_message)
+    print(f"Robot message: {robot_message}")
+    match robot_message:
+        case CommandFinished():
+            send_to_all_web_clients(str(robot_message))
+        case ReportState():
+            print(f"Messaged decoded to be a ReportState: {robot_message.dump()}")
+        case _:
+            raise ValueError(f"Unknown RobotSocketMessage message: {robot_message}")
 
 
 async def start_webserver():
