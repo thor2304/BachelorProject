@@ -65,8 +65,9 @@ async def start_rtde_loop():
     while True:
         try:
             new_state = con.receive()
-            await check_if_state_is_new(new_state, previous_state)
-            previous_state = new_state
+            if state_is_new(new_state, previous_state):
+                await call_listeners(new_state)
+                previous_state = new_state
         except rtde.RTDEException as e:
             print(f"Error in recieve_rtde_data: {e}")
         await asyncio.sleep(SLEEP_TIME)
@@ -77,21 +78,19 @@ def states_are_equal(obj1: DataObject, obj2: DataObject):
 
 
 async def send_state_through_websocket(state: DataObject) -> None:
+    print(f"Sending state: {state}")
     send_to_all_web_clients(str(RobotState(state)))
 
 
-def check_if_state_is_new(new_state: DataObject | None, old_state: DataObject | None):
-
+def state_is_new(new_state: DataObject | None, old_state: DataObject | None):
     if old_state is None and new_state is not None:
-        return call_listeners(new_state)
-
+        return True
     if old_state is None and new_state is None:
-        return None
-
+        return False
     if states_are_equal(old_state, new_state):
-        return None
+        return False
 
-    return call_listeners(new_state)
+    return True
 
 
 def register_listener(listener: ListenerFunction):
