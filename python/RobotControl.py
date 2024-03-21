@@ -128,7 +128,7 @@ def send_user_command(command: CommandMessage, on_socket: Socket) -> str:
 
 
 def test_history(command):
-    history = History()
+    history = History.get_history()
     history.new_command(command)
     history.active_command_state().append_state(State())
     history.debug_print()

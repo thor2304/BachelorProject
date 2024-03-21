@@ -23,12 +23,15 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 import asyncio
 import sys
+from typing import Callable, Coroutine
 
 from rtde import rtde_config, rtde
 from rtde.serialize import DataObject
 from SocketMessages import RobotState
 from RobotControl import POLYSCOPE_IP
 from WebsocketProxy import send_to_all_web_clients
+from undo.History import History
+from undo.State import State
 
 ROBOT_HOST = POLYSCOPE_IP
 ROBOT_PORT = 30004
@@ -39,6 +42,9 @@ state_names, state_types = conf.get_recipe("state")
 
 TRANSMIT_FREQUENCY_IN_HERTZ = 60
 SLEEP_TIME = 1 / TRANSMIT_FREQUENCY_IN_HERTZ
+
+type ListenerFunction = Callable[[DataObject], Coroutine[None, None, None]]
+listeners: list[ListenerFunction] = []
 
 
 async def start_rtde_loop():
@@ -52,12 +58,14 @@ async def start_rtde_loop():
     if not con.send_start():
         sys.exit()
 
+    register_listener(send_state_through_websocket)
+
     previous_state = None
 
     while True:
         try:
             new_state = con.receive()
-            check_if_state_is_new(new_state, previous_state)
+            await check_if_state_is_new(new_state, previous_state)
             previous_state = new_state
         except rtde.RTDEException as e:
             print(f"Error in recieve_rtde_data: {e}")
@@ -68,14 +76,14 @@ def states_are_equal(obj1: DataObject, obj2: DataObject):
     return obj1.__dict__ == obj2.__dict__
 
 
-def send_state_through_websocket(state: DataObject):
+async def send_state_through_websocket(state: DataObject) -> None:
     send_to_all_web_clients(str(RobotState(state)))
 
 
 def check_if_state_is_new(new_state: DataObject | None, old_state: DataObject | None):
 
     if old_state is None and new_state is not None:
-        return send_state_through_websocket(new_state)
+        return call_listeners(new_state)
 
     if old_state is None and new_state is None:
         return None
@@ -83,4 +91,18 @@ def check_if_state_is_new(new_state: DataObject | None, old_state: DataObject | 
     if states_are_equal(old_state, new_state):
         return None
 
-    return send_state_through_websocket(new_state)
+    return call_listeners(new_state)
+
+
+def register_listener(listener: ListenerFunction):
+    listeners.append(listener)
+
+
+async def log_state(state: DataObject):
+    history = History.get_history()
+    history.active_command_state().append_state(State(state))
+
+
+async def call_listeners(with_state: DataObject):
+    for listener in listeners:
+        await listener(with_state)
