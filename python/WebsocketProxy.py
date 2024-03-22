@@ -8,9 +8,10 @@ from typing import Final
 from websockets.server import serve
 
 from RobotControl import send_command, get_interpreter_socket, read_from_socket, send_user_command
-from SocketMessages import AckResponse
+from SocketMessages import AckResponse, RobotState
 from SocketMessages import parse_message, CommandMessage, UndoMessage, UndoResponseMessage, \
     UndoStatus
+from RobotSocketMessages import parse_robot_message, CommandFinished, ReportState
 
 clients = dict()
 _START_BYTE: Final = b'\x02'
@@ -145,8 +146,16 @@ async def client_task(reader: StreamReader, writer: StreamWriter):
 
 def message_from_robot_received(message: bytes):
     decoded_message = message.decode()
-    # print(f"Message from robot: {decoded_message}")
-    send_to_all_web_clients(decoded_message)
+    print(f"Message from robot: {decoded_message}")
+    robot_message = parse_robot_message(decoded_message)
+    print(f"Robot message: {robot_message}")
+    match robot_message:
+        case CommandFinished():
+            send_to_all_web_clients(str(robot_message))
+        case ReportState():
+            print(f"Messaged decoded to be a ReportState: {robot_message.dump()}")
+        case _:
+            raise ValueError(f"Unknown RobotSocketMessage message: {robot_message}")
 
 
 async def start_webserver():
