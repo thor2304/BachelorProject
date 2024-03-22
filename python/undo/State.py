@@ -1,10 +1,17 @@
+from enum import Enum, auto
 from typing import Self
 
 from undo.StateValue import StateValue
 
 
+class StateType(Enum):
+    code_state = auto()
+    rtde_state = auto()
+
+
 class State:
-    def __init__(self, state: list[StateValue] = None):
+    def __init__(self, state_type: StateType, state: list[StateValue] = None):
+        self.state_type = state_type
         self.state = state
 
     def __str__(self):

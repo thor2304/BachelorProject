@@ -6,9 +6,11 @@ class VariableRegistry:
     def __init__(self):
         self._code_variables: list[CodeStateVariable] = []
         self._rtde_variables: list[RtdeStateVariable] = []
+        self._code_variable_dict: dict[str, CodeStateVariable] = {}
 
     def register_code_variable(self, variable: CodeStateVariable) -> None:
         self._code_variables.append(variable)
+        self._code_variable_dict[variable.name] = variable
 
     def register_rtde_variable(self, variable: RtdeStateVariable) -> None:
         self._rtde_variables.append(variable)
@@ -25,6 +27,9 @@ class VariableRegistry:
 
     def get_code_variables(self) -> list[CodeStateVariable]:
         return self._code_variables
+
+    def get_code_variable_dict(self) -> dict[str, CodeStateVariable]:
+        return self._code_variable_dict
 
     def get_rtde_variables(self) -> list[RtdeStateVariable]:
         return self._rtde_variables

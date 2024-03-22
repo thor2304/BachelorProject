@@ -12,6 +12,7 @@ from SocketMessages import AckResponse, RobotState
 from SocketMessages import parse_message, CommandMessage, UndoMessage, UndoResponseMessage, \
     UndoStatus
 from RobotSocketMessages import parse_robot_message, CommandFinished, ReportState
+from undo.HistorySupport import handle_report_state
 
 clients = dict()
 _START_BYTE: Final = b'\x02'
@@ -154,6 +155,7 @@ def message_from_robot_received(message: bytes):
             send_to_all_web_clients(str(robot_message))
         case ReportState():
             print(f"Messaged decoded to be a ReportState: {robot_message.dump()}")
+            handle_report_state(robot_message)
         case _:
             raise ValueError(f"Unknown RobotSocketMessage message: {robot_message}")
 
