@@ -58,6 +58,7 @@ register_all_variables()
 
 
 def read_variable_state():
+    print("Reading variable state")
     interpreter_socket = get_interpreter_socket()
     read_commands = _variable_registry.generate_read_commands()
     report_state = ReportState(read_commands)

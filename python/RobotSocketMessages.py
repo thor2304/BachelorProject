@@ -34,6 +34,7 @@ class VariableObject:
         }
 
     def __str__(self):
+        print(f"stringing: {self.dump()['value']}")
         return json.dumps(self.dump())
 
 
@@ -81,12 +82,13 @@ class ReportState:
         self.variables: list[VariableObject] = variables
 
     def __str__(self):
-        return json.dumps(self.dump())
+        return json.dumps(self.dump(True))
 
-    def dump(self):
+    def dump(self, raw_values=False):
         return {
             "type": self.type.name,
-            "data": [variable.dump_ur_string_for_report_state() for variable in self.variables]
+            "data": [variable.dump() if raw_values else variable.dump_ur_string_for_report_state()
+                     for variable in self.variables]
         }
 
     def dump_string_pre_urify(self):
@@ -117,7 +119,7 @@ def parse_robot_message(message: str) -> CommandFinished | ReportState:
     match parsed:
         case {
             'type': RobotSocketMessageTypes.Report_state.name,
-            'variables': variable_list
+            'data': variable_list
         }:
             parsed_variable_list = parse_list_to_variable_objects(variable_list)
             return ReportState(parsed_variable_list)
@@ -133,4 +135,3 @@ def parse_robot_message(message: str) -> CommandFinished | ReportState:
             return CommandFinished(id, command, tuple(parsed_variable_list))
         case _:
             raise ValueError(f"Unknown RobotSocketMessage type: {parsed}")
-

@@ -37,8 +37,8 @@ class VariableRegistry:
 
 def register_all_code_variables(in_registry: VariableRegistry):
     variables = [
-        CodeStateVariable("test", "test"),
-        CodeStateVariable("test2", "test2")
+        CodeStateVariable("test", "__test__"),
+        CodeStateVariable("test2", "__test2__")
     ]
 
     for variable in variables:
