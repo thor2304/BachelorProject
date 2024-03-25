@@ -13,6 +13,10 @@ from undo.History import History
 from undo.State import State
 
 POLYSCOPE_IP = "polyscope"
+_DASHBOARD_PORT = 29999
+_PRIMARY_PORT = 30001
+_SECONDARY_PORT = 30002
+_INTERPRETER_PORT = 30020
 
 
 def create_get_socket_function() -> Callable[[str, int], Socket]:
@@ -48,38 +52,52 @@ get_socket = create_get_socket_function()
 _interpreter_open = False
 
 
+def get_dashboard_socket():
+    return get_socket(POLYSCOPE_IP, _DASHBOARD_PORT)
+
+
+def get_secondary_socket():
+    return get_socket(POLYSCOPE_IP, _SECONDARY_PORT)
+
+
+def start_interpreter_mode():
+    secondary_socket = get_secondary_socket()
+    send_command("interpreter_mode()", secondary_socket)
+
+
+def power_on_robot():
+    dashboard_socket = get_dashboard_socket()
+    send_command("power on", dashboard_socket)
+
+
+def brake_release_on_robot():
+    dashboard_socket = get_dashboard_socket()
+    send_command("brake release", dashboard_socket)
+
+
 def get_interpreter_socket():
     """This function is safe to call multiple times.
     If the interpreter_socket is opened, then it will be returned from cache"""
-    # default port for socket
-    interpreter_port: int = 30020
 
     global _interpreter_open
     if _interpreter_open:
-        return get_socket(POLYSCOPE_IP, interpreter_port)
+        return get_socket(POLYSCOPE_IP, _INTERPRETER_PORT)
 
-    dashboard_socket = get_socket(POLYSCOPE_IP, 29999)
-    # sleep(5)
-    send_command("power on", dashboard_socket)
-    # sleep(1)
-    send_command("brake release", dashboard_socket)
-    # sleep(1)
-
-    secondary_socket = get_socket(POLYSCOPE_IP, 30002)
-    send_command("interpreter_mode()", secondary_socket)
+    power_on_robot()
+    brake_release_on_robot()
+    start_interpreter_mode()
     sleep(2)
 
     _interpreter_open = True
 
-    interpreter_socket = get_socket(POLYSCOPE_IP, interpreter_port)
+    prepare_interpreter_session()
 
-    prepare_interpreter_session(interpreter_socket)
-
-    return interpreter_socket
+    return get_socket(POLYSCOPE_IP, _INTERPRETER_PORT)
 
 
-def prepare_interpreter_session(interpreter_socket: Socket):
-    ## Starting commands we want to send to the robot
+def prepare_interpreter_session():
+    interpreter_socket = get_socket(POLYSCOPE_IP, _INTERPRETER_PORT)
+    # Starting commands we want to send to the robot
     send_command("__test__ = 2", interpreter_socket)
     send_command("__test2__ = \"f\"", interpreter_socket)
 
@@ -117,7 +135,7 @@ def send_user_command(command: CommandMessage, on_socket: Socket) -> str:
     command_message = command.data.command
     finish_command = CommandFinished(command.data.id, command_message, tuple(list_of_variables))
     string_command = finish_command.dump_ur_string()
-    print(f"String command: {string_command}")
+    print(f"send_user_command method: String command: {string_command}")
     wrapping = URIFY_return_string(string_command)
 
     test_history(command)
