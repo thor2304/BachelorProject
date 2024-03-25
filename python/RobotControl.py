@@ -165,14 +165,13 @@ def sanitize_command(command: str) -> str:
     return command
 
 
-def send_command(command: str, on_socket: Socket, ensure_recovery=False, print_to_console=False) -> str:
+def send_command(command: str, on_socket: Socket, ensure_recovery=False) -> str:
     """Returns the ack_response from the robot. The ack_response is a string."""
     command = sanitize_command(command)
     print(f"Sending the following command: '{escape_string(command)}'")
     on_socket.send(command.encode())
     result = read_from_socket(on_socket)
-    if print_to_console:
-        print(f"\t\t\tReceived: {result}")
+
     if ensure_recovery:
         result = ensure_state_recovery_if_broken(result, command)
 
@@ -195,11 +194,11 @@ list_of_variables.append(VariableObject("__test2__", VariableTypes.String, "f"))
 
 def send_user_command(command: CommandMessage, on_socket: Socket) -> str:
     command_message = command.data.command
-    response_from_command = send_command(command_message, on_socket, ensure_recovery=True, print_to_console=True)
+    response_from_command = send_command(command_message, on_socket, ensure_recovery=True)
 
     finish_command = CommandFinished(command.data.id, command_message, tuple(list_of_variables))
     string_command = finish_command.dump_ur_string()
-    print(f"send_user_command method: String command: {string_command}")
+    print(f"send_user_command method: String command: {escape_string(string_command)}")
     wrapping = URIFY_return_string(string_command)
     send_command(wrapping, on_socket, ensure_recovery=True)
 
@@ -212,6 +211,8 @@ class ResponseMessages(Enum):
     Invalid_state = " Program is in an invalid state"
     Ack = "ack"
     Too_many_commands = " Too many interpreted messages"
+    Compile_error = " Compile error"
+    Syntax_error = " Syntax error"
 
 
 def ensure_state_recovery_if_broken(response: str, command: str) -> str:
@@ -221,14 +222,17 @@ def ensure_state_recovery_if_broken(response: str, command: str) -> str:
 
     response_array = response.split(":")
 
-    if ResponseMessages.Ack.value in response_array:
+    if (ResponseMessages.Ack.value in response_array
+            or ResponseMessages.Compile_error.value in response_array
+            or ResponseMessages.Syntax_error.value in response_array):
         return out
 
     # If the robot has interpreted too many commands.
     if ResponseMessages.Too_many_commands.value in response_array:
         print(f"\t\t\tToo many commands detected. Attempting to fix the state.")
         clear_interpreter_mode()
-        apply_variables_to_robot(list_of_variables)  # Todo: This should apply the variables defined by user. Through what the history object has stored.
+        # Todo: Apply the variables defined by user. Through what the history object has stored.
+        apply_variables_to_robot(list_of_variables) # Temporary fix
         return send_command(command, get_interpreter_socket())  # Resend command since it was lost.
 
     # If the robot is in an invalid state.
@@ -245,7 +249,7 @@ def ensure_state_recovery_if_broken(response: str, command: str) -> str:
 
         print(f"\t\t\tRunning: '{running}'")
         print(f"\t\t\tInvalid state detected. Attempting to fix the state.")
-        if safety_status == "NORMAL" and robot_mode == "RUNNING" and running == "false":
+        if safety_status == "NORMAL" and robot_mode == "RUNNING" and running == "false": #Todo read from history instead of dashboard
             print(f"\t\t\tInterpreter mode is stopped, restarting interpreter ")
             restart_interpreter_mode()
             # If the error causing this if to be true is array out of bounds.
