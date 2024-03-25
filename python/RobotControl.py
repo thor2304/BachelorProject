@@ -3,13 +3,14 @@ from enum import Enum
 from socket import socket as Socket
 from time import sleep
 from typing import Callable
+from socket import gethostbyname, gethostname
 
 import select
 
 from RobotSocketMessages import CommandFinished, VariableObject, VariableTypes
 from SocketMessages import CommandMessage
 from ToolBox import escape_string, time_print
-from URIFY import URIFY_return_string
+from URIFY import URIFY_return_string, SOCKET_NAME
 from undo.History import History
 from undo.State import State
 
@@ -63,8 +64,19 @@ def get_secondary_socket():
 
 def start_interpreter_mode():
     secondary_socket = get_secondary_socket()
-    send_command("interpreter_mode()", secondary_socket)
+    clear_queue_on_enter = "clearQueueOnEnter = True"
+    clear_on_end = "clearOnEnd = True"
+    send_command(f"interpreter_mode({clear_queue_on_enter}, {clear_on_end})", secondary_socket)
     print("Interpreter mode command sent")
+
+
+def restart_interpreter_mode():
+    start_interpreter_mode()
+    # Todo: For some reason the robot needs a sleep here, otherwise open_socket does not work.
+    #  I thought the parameters on interpreter_mode would fix this.
+    sleep(1)
+    apply_variables_to_robot(list_of_variables)
+    open_socket()
 
 
 def clear_interpreter_mode():
@@ -105,6 +117,11 @@ def sanitize_dashboard_reads(response: str) -> str:
     return message.replace('\\n', '').replace(' ', '')
 
 
+def open_socket(host: str = gethostbyname(gethostname()), port: int = 8000):
+    # Todo: Port is duplicate in this method and in open_robot_server, fix it. Cannot import port from websocketProxy, circular imports
+    send_command(f"socket_open(\"{host}\", {port}, {SOCKET_NAME})\n", get_interpreter_socket())
+
+
 def get_interpreter_socket():
     """This function is safe to call multiple times.
     If the interpreter_socket is opened, then it will be returned from cache"""
@@ -126,8 +143,8 @@ def get_interpreter_socket():
 
 
 def prepare_interpreter_session():
-    interpreter_socket = get_socket(POLYSCOPE_IP, _INTERPRETER_PORT)
     # Starting commands we want to send to the robot
+    open_socket()
     apply_variables_to_robot(list_of_variables)
 
 
@@ -151,13 +168,14 @@ def sanitize_command(command: str) -> str:
 def send_command(command: str, on_socket: Socket, ensure_recovery=False, print_to_console=False) -> str:
     """Returns the ack_response from the robot. The ack_response is a string."""
     command = sanitize_command(command)
-    # print(f"Sending the following command: '{escape_string(command)}'")
+    print(f"Sending the following command: '{escape_string(command)}'")
     on_socket.send(command.encode())
     result = read_from_socket(on_socket)
     if print_to_console:
         print(f"\t\t\tReceived: {result}")
     if ensure_recovery:
         result = ensure_state_recovery_if_broken(result, command)
+
     out = ""
     count = 1
     while result != "nothing" and count < 2:
@@ -211,8 +229,7 @@ def ensure_state_recovery_if_broken(response: str, command: str) -> str:
         print(f"\t\t\tToo many commands detected. Attempting to fix the state.")
         clear_interpreter_mode()
         apply_variables_to_robot(list_of_variables)  # Todo: This should apply the variables defined by user. Through what the history object has stored.
-        out = send_command(command, get_interpreter_socket())  # Resend command since it was lost.
-        return out
+        return send_command(command, get_interpreter_socket())  # Resend command since it was lost.
 
     # If the robot is in an invalid state.
     if ResponseMessages.Invalid_state.value in response_array:
@@ -230,7 +247,12 @@ def ensure_state_recovery_if_broken(response: str, command: str) -> str:
         print(f"\t\t\tInvalid state detected. Attempting to fix the state.")
         if safety_status == "NORMAL" and robot_mode == "RUNNING" and running == "false":
             print(f"\t\t\tInterpreter mode is stopped, restarting interpreter ")
-            start_interpreter_mode()
+            restart_interpreter_mode()
+            # If the error causing this if to be true is array out of bounds.
+            # Then the command is acknowledged but the command_finished is not since the robot
+            # goes into an invalid state after it has acknowledged the command that was actually invalid.
+            # Therefore, we need to resend the commandfinished message.
+            return send_command(command, get_interpreter_socket(), ensure_recovery=True)
 
     return out
 

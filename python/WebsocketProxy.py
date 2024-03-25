@@ -2,12 +2,11 @@ import asyncio
 from asyncio import StreamReader, StreamWriter, Task
 from socket import gethostbyname, gethostname
 from socket import socket as Socket
-from time import sleep
 from typing import Final
 
 from websockets.server import serve
 
-from RobotControl import send_command, get_interpreter_socket, read_from_socket, send_user_command
+from RobotControl import get_interpreter_socket, send_user_command, open_socket
 from SocketMessages import AckResponse, RobotState
 from SocketMessages import parse_message, CommandMessage, UndoMessage, UndoResponseMessage, \
     UndoStatus
@@ -74,14 +73,8 @@ async def open_robot_server():
     print(f"ip_address of this container: {gethostbyname(gethostname())}")
     async with srv:
         print('server listening for robot connections')
-        connect_to_robot_server(gethostbyname(gethostname()), port)
+        open_socket()
         await srv.serve_forever()
-
-
-def connect_to_robot_server(host: str, port: int):
-    send_command(f"socket_open(\"{host}\", {port})\n", get_interpreter_socket())
-    sleep(1)
-    print(f"Manual delayed read resulted in: {read_from_socket(get_interpreter_socket())}")
 
 
 def client_connected_cb(client_reader: StreamReader, client_writer: StreamWriter):
@@ -97,7 +90,7 @@ def client_connected_cb(client_reader: StreamReader, client_writer: StreamWriter
         try:  # Retrieve the result and ignore whatever returned, since it's just cleaning
             fu.result()
         except Exception as e:
-            pass
+            raise e
         # Remove the client from client records
         del clients[client_id]
 
@@ -113,7 +106,9 @@ async def client_task(reader: StreamReader, writer: StreamWriter):
     extra_data = []
 
     while True:
-        data = await reader.read(16)
+        data = await reader.read(4096)
+        if data:
+            print(f"BACKEND recieved data from client: {data}")
 
         if data == _EMPTY_BYTE:
             print('Received EOF. Client disconnected.')
