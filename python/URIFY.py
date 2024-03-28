@@ -1,6 +1,7 @@
 from RobotSocketVariableTypes import VariableTypes
 
-SOCKET_NAME = '\"abcd\"' # We use a specific name in the so the user can open his own socket without specifying name
+SOCKET_NAME = '\"abcd\"'  # We use a specific name in the so the user can open his own socket without specifying name
+
 
 def URIFY_return_string(string_to_urify: str) -> str:
     """
@@ -49,7 +50,10 @@ def _urify_string(string: str) -> str:
         urified_string += create_quote_send()
 
     for part in between_quotes:
+        # We want to send strings if empty string
+        # This is due to a="Hi" resulting in "a=\\"Hi\\"" before urify_string is called.
         if part == "":
+            urified_string += create_quote_send()
             continue
 
         urified_string += create_quote_send()
@@ -57,7 +61,9 @@ def _urify_string(string: str) -> str:
 
     return urified_string
 
+
 def create_socket_send_string_variable(string_to_send: str) -> str:
+    print(repr(string_to_send))
     if string_to_send == "":
         return ""
 
@@ -79,6 +85,8 @@ def create_socket_send_string_variable(string_to_send: str) -> str:
         out = create_quote_send() + out + create_quote_send()
 
     return out
+
+
 def create_socket_send_string(string_to_send: str) -> str:
     if string_to_send == "":
         return ""
