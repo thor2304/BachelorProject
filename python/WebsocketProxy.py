@@ -2,15 +2,18 @@ import asyncio
 from asyncio import StreamReader, StreamWriter, Task
 from socket import gethostbyname, gethostname
 from socket import socket as Socket
+from time import sleep
 from typing import Final
 
 from websockets.server import serve
 
-from RobotControl import get_interpreter_socket, send_user_command, open_socket
-from SocketMessages import AckResponse, RobotState
-from SocketMessages import parse_message, CommandMessage, UndoMessage, UndoResponseMessage, \
-    UndoStatus
+from RobotControl import get_interpreter_socket, send_user_command, power_on_robot, brake_release_on_robot, \
+    get_robot_mode, start_interpreter_mode_and_connect_to_backend_socket, read_from_socket_till_end
+from SocketMessages import AckResponse
+from SocketMessages import parse_message, CommandMessage, UndoMessage, UndoResponseMessage, UndoStatus
 from RobotSocketMessages import parse_robot_message, CommandFinished, ReportState
+from ToolBox import escape_string
+from WebsocketNotifier import websocket_notifier
 
 clients = dict()
 _START_BYTE: Final = b'\x02'
@@ -59,11 +62,18 @@ def get_handler(socket: Socket) -> callable:
 
 
 def send_to_all_web_clients(message: str):
-    for websocket in _connected_web_clients:
+    # We need to use list() around connected web clients to prevent: RuntimeError: Set changed size during iteration
+    # The exception occurred when you refreshed the web and send a new command.
+    for websocket in list(_connected_web_clients):
         if websocket.closed:
             _connected_web_clients.remove(websocket)
             continue
+    for websocket in _connected_web_clients:
         asyncio.create_task(websocket.send(message))
+
+
+# To prevent circular dependencies
+websocket_notifier.register_observer(send_to_all_web_clients)
 
 
 async def open_robot_server():
@@ -73,7 +83,6 @@ async def open_robot_server():
     print(f"ip_address of this container: {gethostbyname(gethostname())}")
     async with srv:
         print('server listening for robot connections')
-        open_socket()
         await srv.serve_forever()
 
 
@@ -154,8 +163,31 @@ def message_from_robot_received(message: bytes):
 
 
 async def start_webserver():
-    print("Connecting to interpreter")
+    ensure_polyscope_is_ready()
+    print(f"Polyscope is ready. The robot mode is: {get_robot_mode()}")
+
+    power_on_robot()
+    brake_release_on_robot()
+    start_interpreter_mode_and_connect_to_backend_socket()
+
     interpreter_socket: Socket = get_interpreter_socket()
     print("Starting websocket server")
     async with serve(get_handler(interpreter_socket), "0.0.0.0", 8767):
         await asyncio.Future()  # run forever
+
+
+def ensure_polyscope_is_ready():
+    robot_mode = get_robot_mode()
+    rerun = False
+    if robot_mode == '' or robot_mode == 'BOOTING':
+        print(f"Polyscope is still starting: {robot_mode}")
+        rerun = True
+
+    # UniversalRobotsDashboardServer is a not documented state, but it is a state that the robot can be in
+    if robot_mode == 'NO_CONTROLLER' or robot_mode == 'DISCONNECTED' or robot_mode == 'UniversalRobotsDashboardServer':
+        print(f"Polyscope is in current state of starting: {robot_mode}")
+        rerun = True
+
+    if rerun:
+        sleep(0.1)
+        ensure_polyscope_is_ready()
